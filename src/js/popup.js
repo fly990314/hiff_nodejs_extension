@@ -1,6 +1,6 @@
 'use strict';
 
-import './popup.css';
+import '../css/popup.css';
 
 (function() {
   // We will make use of Storage API to get and store `count` value
@@ -116,3 +116,12 @@ import './popup.css';
     }
   );
 })();
+
+// chrome.runtime.sendMessage(
+//   extensionId?: string,
+//   message: any,
+//   options?: object,
+//   callback?: function,
+// )
+// message -> 傳送的訊息
+// callback -> 回傳的訊息需要做的function，例如:把回傳的訊息console.log出來
