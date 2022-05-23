@@ -11,7 +11,7 @@ startCompare_btn_listener.addEventListener('click',
                 {
                     type: 'START_COMPARE',
                     payload:{
-                                message: 'Hello, in mainPanel. we need to perpare compare.',
+                                message: 'Hello, in sidebarPanel. we need to perpare compare.',
                             },
                 },
                 response => 
@@ -29,7 +29,7 @@ endCompare_btn_listener.addEventListener('click',
                 {
                     type: 'END_COMPARE',
                     payload:{
-                                message: 'Hello, in mainPanel. we need to end compare.',
+                                message: 'Hello, in sidebarPanel. we need to end compare.',
                             },
                 },
                 response => 
@@ -47,7 +47,7 @@ reset_btn_listener.addEventListener('click',
                 {
                     type: 'RESET',
                     payload:{
-                                message: 'Hello, in mainPanel. we need to reset.',
+                                message: 'Hello, in sidebarPanel. we need to reset.',
                             },
                 },
                 response => 
@@ -57,39 +57,3 @@ reset_btn_listener.addEventListener('click',
             );
           }
 );
-
-// example code
-
-    // chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    //     if (request.type === 'GREETINGS') {
-    //       const message = `Hi ${
-    //         sender.tab ? 'Con' : 'Pop'
-    //       }, my name is Bac. I am from Background. It's great to hear from you.`;
-    
-    //       // Log message coming from the `request` parameter
-    //       console.log(request.payload.message);
-    //       // Send a response message
-    //       sendResponse({
-    //         message,
-    //       });
-    //     }
-    //   });
-
-    //   chrome.runtime.sendMessage(
-    //     {
-    //       type: 'GREETINGS',
-    //       payload: {
-    //         message: 'Hello, my name is Pop. I am from Popup.',
-    //       },
-    //     },
-    //     response => {
-    //       console.log(response.message);
-    //     }
-    //   );
-    // })();
-
-// chrome.runtime.sendMessage(
-//   callback: function,
-// )
-// callback -> (extensionId?: string, message: any, options?: object, callback?: function,)) => boolean | undefined
-
