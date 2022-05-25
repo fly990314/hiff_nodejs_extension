@@ -3,20 +3,30 @@
 <head>
   <meta charset="UTF-8">
   <title>hiff_mainPanel</title>
+  <link rel="stylesheet" href="mainPanel.css" />
 </head>
 <body>
+  <div class="mainPanel">
     <div class="buttonSet">
-        <button class="btn" id="startCompare">Start Compare</button>
-        <button class="btn" id="endCompare">End Compare</button>
-        <button class="btn" id="reset"> Reset</button>
-      </div>
-    <div class="msg">
-        <p>Ready to start</p>
+      <button class="button" id="startCompare">Start Compare</button>
+      <button class="button" id="endCompare">End Compare</button>
+      <button class="button" id="reset"> Reset</button>
     </div>
 
-    <div class="timer-result" id="timermsg">
-      <p>Time in Timer</p>
+    <hr class="divider" />
+    <div class="timerSet">
+      <input id="timer-input" type="text" placeholder="輸入timer秒數">
+      <button class="ensure-tiimer-btn" id="timer-setting-btn">更換timer秒數</button>
+      <div class="timer-result" id="timerPrintBox">Timer Setting is 3sec</div>
+    </div> 
+
+    <hr class="divider" />
+
+    <div class="msg">
+      <p>Ready to start</p>
     </div>
-    <script src="mainPanel.js"></script>
+    
+  </div>
+  <script src="mainPanel.js"></script>
 </body>
 </html>
