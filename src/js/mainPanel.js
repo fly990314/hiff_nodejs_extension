@@ -10,9 +10,13 @@ import '../css/mainPanel.css';
     const setting_timer_btn = document.getElementById("timer-setting-btn");
     const timer_input_field = document.getElementById("timer-input");
     const timer_box = document.getElementById("timerPrintBox");
+    const get_html_msgbox = document.getElementById("html_msg");
+    const get_extension_html_btn = document.getElementById("get_extension_html");
+    // const get_current_html_btn = document.getElementById("get_current_html");
 
     var timer_time = 3;
     var countInterval;
+    
 
     var add_text_node_in_element = function(element, text)
     {
@@ -103,23 +107,83 @@ import '../css/mainPanel.css';
     );
 
     setting_timer_btn.addEventListener('click', 
-    () => {
-            // console.log(timer_input_field.value)
-            clearInterval(countInterval);
-            if( Number(timer_input_field.value) != NaN && timer_input_field.value > 0)
-            {
-                timer_time = timer_input_field.value; 
-                add_text_node_in_element(timer_box, `Timer Setting is ${timer_time}sec`);
-            }
-            else
-            {
-                add_text_node_in_element(timer_box, `Should be input valid value`);
-            }
+        () => {
+                clearInterval(countInterval);
+                if( Number(timer_input_field.value) != NaN && timer_input_field.value > 0)
+                {
+                    timer_time = timer_input_field.value; 
+                    add_text_node_in_element(timer_box, `Timer Setting is ${timer_time}sec`);
+                }
+                else
+                {
+                    add_text_node_in_element(timer_box, `Should be input valid value`);
+                }
 
-            timer_input_field.value = "";
+                timer_input_field.value = "";
             
-        }
+            }
     );
+
+    get_extension_html_btn.addEventListener('click', 
+        () => {
+                console.log("click extension html btn!!")
+
+                var start_num = "\x3Cscript".length;
+                var end_num = "\x3C/script>".length;
+                add_text_node_in_element(get_html_msgbox, "");
+                var current_html_content = document.body.innerHTML;
+                var html_content = current_html_content.replace(/\n/g, "").replace(/    /g, "");
+
+                while(html_content.indexOf("\x3Cscript") != -1 )
+                {
+                    var index_start = html_content.indexOf("\x3Cscript");
+                    var index_end = html_content.indexOf("\x3C/script>");
+                    html_content = html_content.slice( 0, index_start-1 ) + html_content.slice( index_end + end_num, html_content.length - 1 );
+                }
+                add_text_node_in_element(get_html_msgbox, html_content);
+            }
+    );
+
+    // get_current_html_btn.addEventListener('click', 
+    // () => {
+    //         console.log("click current html btn!!");
+    //         chrome.runtime.sendMessage(
+    //             {
+    //                 type: 'Start current html',
+    //                 payload:{ message: 'want to get current html.' }
+    //             },
+    //             response => { console.log(response.msg);}
+    //         )
+    //         // chrome.tabs.query(
+    //         //   { active: true, currentWindow: true }, 
+    //         //   tabs =>
+    //         //   {
+    //         //     console.log(tabs);
+    //         //     // const tab = tabs[0];  
+    //         //     // chrome.tabs.sendMessage
+    //         //     //       (tab.id, 
+    //         //     //           {
+    //         //     //               type: 'PrepareHTML',
+    //         //     //               payload:{ message: 'prepare to get current HTML from background' }
+    //         //     //           },
+    //         //     //           response => {
+    //         //     //             console.log('test response!');
+    //         //     //           }
+    //         //     //       );
+    //         //   }
+    //         // );
+    //     }
+    // );
+
+    // chrome.runtime.onMessage.addListener( 
+    //     (sender_package, sender, return_sender_response) => 
+    //     {
+    //         if (sender_package.type === 'ReturnHTML') {
+    //             add_text_node_in_element(get_html_msgbox, "");
+    //             // add_text_node_in_element(get_html_msgbox, sender_package.payload.content);
+    //         }
+    //     }
+    // );
 
 })();
 // example code

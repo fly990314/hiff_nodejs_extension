@@ -45,17 +45,11 @@ chrome.runtime.onMessage.addListener(
       return_sender_response( { msg: return_sender_reset_msg } );
     }
 
-    if (sender_package.type === 'GREETINGS') {
+    else if (sender_package.type === 'GREETINGS') {
       var return_greeting_msg = `Hi, in background, try to send message.`;
 
       console.log(sender_package.payload.message);
       return_sender_response( { msg: return_greeting_msg } );
     }
-  }
-);
 
-// chrome.runtime.onMessage.addListener(
-//   callback: function,
-// )
-// callback -> (message: any, sender: MessageSender, sendResponse: function) => boolean | undefined
-
+});

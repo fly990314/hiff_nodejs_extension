@@ -63,7 +63,7 @@ import '../css/popup.css';
         // active tab by sending a message
         chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
           const tab = tabs[0];
-
+          console.log(tab)
           chrome.tabs.sendMessage(
             tab.id,
             {
@@ -120,6 +120,7 @@ import '../css/popup.css';
   var endCompare_btn_listener = document.getElementById("endCompare");
   var reset_btn_listener = document.getElementById("reset");
   
+  
   startCompare_btn_listener.addEventListener('click', 
       () => {
               chrome.runtime.sendMessage
@@ -174,13 +175,24 @@ import '../css/popup.css';
             }
   );
 
+  var get_current_html_btn = document.getElementById("get_current_html");
+  get_current_html_btn.addEventListener('click', 
+  () => 
+    {
+      chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
+        const tab = tabs[0];
+        console.log(tab)
+        chrome.tabs.sendMessage(
+          tab.id,
+          {
+            type: 'GetCurrentHTMLInPopup',
+            message:"Click Get current html btn."
+          },
+          response => {
+            console.log("Finish current html:" +  response.content);
+          }
+        );
+      });
+    }
+  );
 })();
-
-// chrome.runtime.sendMessage(
-//   extensionId?: string,
-//   message: any,
-//   options?: object,
-//   callback?: function,
-// )
-// message -> 傳送的訊息
-// callback -> 回傳的訊息需要做的function，例如:把回傳的訊息console.log出來
