@@ -12,7 +12,7 @@ import '../css/mainPanel.css';
     const timer_box = document.getElementById("timerPrintBox");
     const get_html_msgbox = document.getElementById("html_msg");
     const get_extension_html_btn = document.getElementById("get_extension_html");
-    // const get_current_html_btn = document.getElementById("get_current_html");
+    const get_current_html_btn = document.getElementById("get_current_html");
 
     var timer_time = 3;
     var countInterval;
@@ -43,7 +43,7 @@ import '../css/mainPanel.css';
                     (
                         function ()
                         {
-                            let paddedFormat = function(num) {return num < 10 ? "0" + num : num; };
+                            // let paddedFormat = function(num) {return num < 10 ? "0" + num : num; };
                             // min = parseInt(secondsRemaining / 60);
                             // sec = parseInt(secondsRemaining % 60);
                             // add_text_node_in_element(timer_box, `${paddedFormat(min)}:${paddedFormat(sec)}`);
@@ -144,80 +144,17 @@ import '../css/mainPanel.css';
             }
     );
 
-    // get_current_html_btn.addEventListener('click', 
-    // () => {
-    //         console.log("click current html btn!!");
-    //         chrome.runtime.sendMessage(
-    //             {
-    //                 type: 'Start current html',
-    //                 payload:{ message: 'want to get current html.' }
-    //             },
-    //             response => { console.log(response.msg);}
-    //         )
-    //         // chrome.tabs.query(
-    //         //   { active: true, currentWindow: true }, 
-    //         //   tabs =>
-    //         //   {
-    //         //     console.log(tabs);
-    //         //     // const tab = tabs[0];  
-    //         //     // chrome.tabs.sendMessage
-    //         //     //       (tab.id, 
-    //         //     //           {
-    //         //     //               type: 'PrepareHTML',
-    //         //     //               payload:{ message: 'prepare to get current HTML from background' }
-    //         //     //           },
-    //         //     //           response => {
-    //         //     //             console.log('test response!');
-    //         //     //           }
-    //         //     //       );
-    //         //   }
-    //         // );
-    //     }
-    // );
-
-    // chrome.runtime.onMessage.addListener( 
-    //     (sender_package, sender, return_sender_response) => 
-    //     {
-    //         if (sender_package.type === 'ReturnHTML') {
-    //             add_text_node_in_element(get_html_msgbox, "");
-    //             // add_text_node_in_element(get_html_msgbox, sender_package.payload.content);
-    //         }
-    //     }
-    // );
+    get_current_html_btn.addEventListener('click', 
+    () => {
+            console.log("click current html btn!!");
+            chrome.runtime.sendMessage(
+                {
+                    type: 'Prepare_Get_CurrentHTML_In_MainPanel',
+                    payload:{ message: 'sender: prepare to get current html.' }
+                },
+                response => { console.log(response.msg);}
+            )
+        }
+    );
 
 })();
-// example code
-
-    // chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    //     if (request.type === 'GREETINGS') {
-    //       const message = `Hi ${
-    //         sender.tab ? 'Con' : 'Pop'
-    //       }, my name is Bac. I am from Background. It's great to hear from you.`;
-    
-    //       // Log message coming from the `request` parameter
-    //       console.log(request.payload.message);
-    //       // Send a response message
-    //       sendResponse({
-    //         message,
-    //       });
-    //     }
-    //   });
-
-    //   chrome.runtime.sendMessage(
-    //     {
-    //       type: 'GREETINGS',
-    //       payload: {
-    //         message: 'Hello, my name is Pop. I am from Popup.',
-    //       },
-    //     },
-    //     response => {
-    //       console.log(response.message);
-    //     }
-    //   );
-    // })();
-
-// chrome.runtime.sendMessage(
-//   callback: function,
-// )
-// callback -> (extensionId?: string, message: any, options?: object, callback?: function,)) => boolean | undefined
-
