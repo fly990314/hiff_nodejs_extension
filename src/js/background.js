@@ -1,8 +1,74 @@
 'use strict';
 
-var hiff = require('../lib/index.js');
+const hiff = require('../lib/index.js');
+const {parse, stringify} = require('flatted/cjs');
 var content_start_in_background = "";
 var content_end_in_background = "";
+
+var htmlInit = function diffview_stringAsLines(original_html_content)
+{
+  let start_script_string = "\x3Cscript";
+  let end_script_string = "\x3C/script>";
+  let html_content = original_html_content;
+  html_content = html_content.replace(/\n/g, "").replace(/    /g, "");
+
+  while(html_content.indexOf(start_script_string) != -1 )
+  {
+      let index_start = html_content.indexOf(start_script_string);
+      let index_end = html_content.indexOf(end_script_string);
+      html_content = html_content.slice( 0, index_start) + html_content.slice( index_end + end_script_string.length, html_content.length);
+  }
+
+  return html_content;
+}
+
+var get_after_compare_html = function (){
+  chrome.tabs.query
+  (
+    { active: true }, 
+    tabs => 
+      {
+        const tabID = tabs[0].id;
+        chrome.tabs.sendMessage
+        (
+          tabID,
+          {
+            type: 'need_to_get_current_html_and_compare HTML',
+            payload:{ senderLocation: 'background', message: 'we need to get current html, and compate with HTML of before and after.' }
+          },
+          return_sender_tab_response => 
+          { 
+            content_end_in_background = return_sender_tab_response.compare_after_content;
+            // console.log(content_end_in_background);
+          }
+        );
+      }
+  );
+};
+
+var wait_after_compare_data_and_finish_compare_and_return = function () {
+  if( content_end_in_background === "" ) 
+  {
+      setTimeout(() => { wait_after_compare_data_and_finish_compare_and_return(); }, 1000); 
+  } 
+  else
+  {
+    let before = htmlInit(content_start_in_background);
+    let after = htmlInit(content_end_in_background)
+
+    let result = hiff.compare(before, after);
+    console.log(result)
+    chrome.runtime.sendMessage
+    (
+      {
+        type: 'return_compare_result_to_mainPanel',
+        payload:{ senderLocation: 'background', message: 'we compare over and return result to mainPanel.' },
+        compareResult: stringify(result)
+      },
+      response => { }
+      );
+  }
+}
 
 chrome.runtime.onMessage.addListener( 
   (sender_package, sender, return_sender_response) => 
@@ -36,8 +102,8 @@ chrome.runtime.onMessage.addListener(
               payload:{ senderLocation: 'background', message: 'we need to get current html, save in background and wait to end compare.' }
             },
             return_sender_tab_response => { 
-              content_start_in_background = return_sender_tab_response.content; 
-              console.log(content_start_in_background);
+              content_start_in_background = return_sender_tab_response.compare_before_content; 
+              // console.log(content_start_in_background);
             }
           );
         }
@@ -49,47 +115,9 @@ chrome.runtime.onMessage.addListener(
   {
     console.log("start to save second html.")
 
-    var return_result = function checkFlag() {
-      if( content_end_in_background === "" ) 
-      {
-          setTimeout(() => { checkFlag(); }, 1000); 
-      } 
-      else 
-      {
-        chrome.runtime.sendMessage
-        (
-          {
-            type: 'return_compare_result_to_mainPanel',
-            payload:{ senderLocation: 'background', message: 'we compare over and return result to mainPanel.' }
-          },
-          response => { }
-          );
-      }
-    }
+    get_after_compare_html();
 
-    chrome.tabs.query
-    (
-      { active: true }, 
-      tabs => 
-        {
-          const tabID = tabs[0].id;
-          chrome.tabs.sendMessage
-          (
-            tabID,
-            {
-              type: 'need_to_get_current_html_and_compare HTML',
-              payload:{ senderLocation: 'background', message: 'we need to get current html, and compate with HTML of before and after.' }
-            },
-            return_sender_tab_response => 
-            { 
-              content_end_in_background = return_sender_tab_response.content;
-              console.log(content_end_in_background);
-            }
-          );
-        }
-    );
-
-    return_result();
+    wait_after_compare_data_and_finish_compare_and_return();
 
     return_sender_response( { } );
   }

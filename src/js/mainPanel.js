@@ -1,6 +1,7 @@
 // 'use strict';
 import { isNumber } from 'lodash';
 import '../css/mainPanel.css';
+const {parse, stringify} = require('flatted/cjs');
 
 const startCompare_btn = document.getElementById("startCompare");
 const stopCompare_btn = document.getElementById("stopCompare");
@@ -112,7 +113,8 @@ chrome.runtime.onMessage.addListener(
     (sender_package, sender, return_sender_response) => 
     {
         if (sender_package.type === 'return_compare_result_to_mainPanel') {
-            add_text_node_in_element( get_html_msgbox, sender_package.payload.message);
+            let parse_result = parse(sender_package.compareResult)
+            add_text_node_in_element( get_html_msgbox, parse_result.changes[0].message);
             return_sender_response( { } );
             }
     }

@@ -21,15 +21,15 @@ chrome.runtime.onMessage.addListener((sender_package, sender, return_sender_resp
   }
 
   else if (sender_package.type === 'need_to_get_current_html_and_save_in_background') {
-    let html = document.body.innerHTML;
+    let compare_before_html = document.body.innerHTML;
     console.log("finish to get to current HTML.");
-    return_sender_response( { content: html } );
+    return_sender_response( { compare_before_content: compare_before_html } );
   }
 
   else if (sender_package.type === 'need_to_get_current_html_and_compare HTML') {
-    let html = document.body.innerHTML;
+    let compare_after_html = document.body.innerHTML;
     console.log("finish to get to second current HTML.");
-    return_sender_response( { content: html } );
+    return_sender_response( { compare_after_content: compare_after_html } );
   }
 
   return true;
