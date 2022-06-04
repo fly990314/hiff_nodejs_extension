@@ -86,7 +86,7 @@ code {
 
 .divider {
   margin: 30px auto 25px;
-  width: 50px;
+  width: 150px;
   border: 0.5px dashed #000;
-  opacity: 0.1;
+  opacity: 0.2;
 }

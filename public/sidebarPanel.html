@@ -3,16 +3,40 @@
 <head>
   <meta charset="UTF-8">
   <title>hiff_mainPanel_of_sidebarPanel</title>
+  <link rel="stylesheet" href="sidebarPanel.css" />
 </head>
 <body>
-    <div class="buttonSet">
-        <button class="btn" id="startCompare">Start Compare</button>
-        <button class="btn" id="endCompare">End Compare</button>
-        <button class="btn" id="reset"> Reset</button>
-      </div>
-    <div class="msg">
-        <p>Ready to start</p>
+  <div class="sidebarPanel">
+    <div class="timer-set">
+      <div class="title">Timer</div>
+      <hr class="divider" />
+      <input id="timer-input" type="text" placeholder="輸入timer秒數">
+      <button class="ensure-tiimer-btn" id="timer-setting-btn">更換timer秒數</button>
+      <div class="result" id="timerPrintBox">Timer Setting is 3sec</div>
     </div>
-    <script src="sidebarPanel.js"></script>
+    <div class="filter-set">
+      <div class="title">Compare Filter</div>
+      <hr class="divider" />
+    </div>
+    <div class="compareControl-set">
+      <div class="title">Compare Control</div>
+      <hr class="divider" />
+      <button class="button" id="startCompare">Start Compare</button>
+      <button class="button" id="stopCompare">Stop Compare</button>
+      <button class="button" id="reset"> Reset</button>
+      <div class="result" id="compareResult">Compare Status</div>
+    </div>
+
+    <div class="compareControl-set">
+      <div class="title">Compare Result</div>
+      <hr class="divider" />
+    </div>
+
+    <div class="msg" id="html_msg">
+      No message.
+    </div>
+    
+  </div>
+  <script src="sidebarPanel.js"></script>
 </body>
 </html>
