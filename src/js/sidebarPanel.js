@@ -1,17 +1,29 @@
 'use strict';
 import { isNumber } from 'lodash';
 import '../css/sidebarPanel.css';
+import 'bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
 const {parse, stringify} = require('flatted/cjs');
 
 const startCompare_btn = document.getElementById("startCompare");
 const stopCompare_btn = document.getElementById("stopCompare");
-const reset_btn = document.getElementById("reset");
 const setting_timer_btn = document.getElementById("timer-setting-btn");
 const timer_input_field = document.getElementById("timer-input");
 const timer_box = document.getElementById("timerPrintBox");
 const compare_control_box = document.getElementById("compareResult");
 
 const get_html_msgbox = document.getElementById("html_msg");
+
+var filter_checkbox_1_result = false;
+var filter_checkbox_2_result = false;
+var filter_checkbox_2_input_result = "";
+var filter_checkbox_3_result = false;
+
+const filter_checkbox_1 = document.getElementById("control-option1");
+const filter_checkbox_2 = document.getElementById("control-option2");
+const filter_checkbox_3 = document.getElementById("control-option3");
+
+const filter_tag_input = document.getElementById("control-option2-input");
 
 var timer_time = 3;
 var countInterval;
@@ -67,10 +79,36 @@ var time_showing_function = function(actualTime) {
     );
 };
 
+var update_filter_panel_results = function() {
+    if(filter_checkbox_1.checked) {filter_checkbox_1_result = true;}
+        else {filter_checkbox_1_result = false;} 
+    if(filter_checkbox_2.checked) {filter_checkbox_2_result = true;}
+        else {filter_checkbox_2_result = false;} 
+    if(filter_checkbox_3.checked) {filter_checkbox_3_result = true;}
+        else {filter_checkbox_3_result = false;}
+    if(filter_tag_input.disable != true) { filter_checkbox_2_input_result = filter_tag_input.value; }
+    console.log("filter_checkbox_1_result: " + filter_checkbox_1_result);
+    console.log("filter_checkbox_2_result: " + filter_checkbox_2_result);
+    console.log("filter_checkbox_3_result: " + filter_checkbox_3_result);
+    console.log("filter_checkbox_2_inputresult: " + filter_checkbox_2_input_result);
+
+}
+
 // listener
+filter_checkbox_2.addEventListener('change', function() {
+    if (this.checked) {
+      filter_tag_input.disabled=false;
+    } 
+    else {
+        filter_tag_input.value = "";
+      filter_tag_input.disabled=true;
+    }
+  });
+
 startCompare_btn.addEventListener('click', 
     () => 
     {
+        update_filter_panel_results();
         time_showing_function(timer_time);
         communicate_with_start_compare();
     }
@@ -81,15 +119,6 @@ stopCompare_btn.addEventListener('click',
     {
         clearInterval(countInterval);
         add_text_node_in_element(timer_box, `強制End timer=${timer_time}秒`);
-    }
-);
-
-reset_btn.addEventListener('click', 
-    () => 
-    {
-        timer_time = 3;
-        clearInterval(countInterval);
-        add_text_node_in_element(timer_box, `回復預設設定timer=${timer_time}秒`);
     }
 );
 
