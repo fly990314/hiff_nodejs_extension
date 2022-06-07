@@ -63,7 +63,7 @@
                             <button class="w-100 btn btn-secondary" id="stopCompare">Stop Compare</button>
                         </div>
                         <div class="col-12">
-                            <div class="result d-flex justify-content-center mt-3" id="compareResult">Compare Status</div>
+                            <div class="result d-flex justify-content-center mt-3" id="timerPrintBox">Compare Status</div>
                         </div>
                         
                     </div>
@@ -71,12 +71,57 @@
             </div>
 
             <div class="col-12 col-lg-10 mt-3">
+                <div class="title d-flex justify-content-center">Compare Result</div>
                 <hr class="divider">
                 <div class="html_msg d-flex justify-content-center" id="html_msg">No message.</div>
+                
+                <select class="form-select mb-2" name="compared-result">
+                    <option value="">請選擇查看的元件變化</option>
+                    <optgroup id="dropdown-changed-area" label="changed-area">
+                        <option disabled>未結果</option>
+                    </optgroup>
+                    <optgroup id="dropdown-added-area" label="added-area">
+                        <option disabled>未結果</option>
+                    </optgroup>
+                    <optgroup id="dropdown-removed-area" label="removed-area">
+                        <option disabled>未結果</option>
+                    </optgroup>
+                </select>
             </div>
 
-        </div>
-    </div>
+            <div class="col-12 col-lg-10 mt-2">
+                <div id="select-result" class="result d-flex justify-content-center mb-3">select result: -> </div>
+
+                <table class="table table-bordered table-responsive">
+                    <thead>
+                        <tr>
+                        <th scope="col" class="first-table bg-dark text-white" >Attribute</th>
+                        <th scope="col" class="second-table bg-dark text-white">Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                        <th rowspan='2' scope="row" class="text-center text-nowrap bg-dark bg-opacity-50">attribute1</th>
+                        <td class="">before_value</td>
+                        </tr>
+                        <tr>
+                        <td class="table-secondary">after_value</td>
+                        </tr>
+
+                        <tr>
+                        <th rowspan='2' scope="row" class="text-center text-nowrap bg-dark bg-opacity-50">attribute2</th>
+                        <td class="">before_value</td>
+                        </tr>
+                        <tr>
+                        <td class="table-secondary">after_value</td>
+                        </tr>
+
+                        </tr>
+                    </tbody>
+                    </table>
+
+            </div>
+            <!-- 第一個問題比較容易解決，可以用 Bootstrap 中提供的 .text-nowrap 來避免表格欄位標頭換行即可。 -->
     <script src="sidebarPanel.js"></script>
 </body>
 </html>
