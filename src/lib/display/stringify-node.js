@@ -30,7 +30,8 @@ function stringifyNode($node) {
 
       // shorten HTML if necessary
       var originalHTML = $clone.html();
-      if (originalHTML && originalHTML.length > 80)
+      // if (originalHTML && originalHTML.length > 80)
+      if (originalHTML)
         $clone.html("...");
 
       return $.html($clone);

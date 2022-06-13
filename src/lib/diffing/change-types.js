@@ -53,7 +53,12 @@ function changed($nodeBefore, $nodeAfter) {
     type: "changed",
     before: locationInfo(before.$parent, $nodeBefore, before.index),
     after: locationInfo(after.$parent, $nodeAfter, after.index),
-    message: "Modified: " + coloredChanges(stringify($nodeBefore), stringify($nodeAfter))
+    message: "Modified: " + coloredChanges(stringify($nodeBefore), stringify($nodeAfter)),
+    before_test: $nodeBefore[0],
+    after_test: $nodeAfter[0],
+    attributeAfter: merge_element_attribute_to_object($nodeAfter),
+    attributeBefore: merge_element_attribute_to_object($nodeBefore),
+    test: diff_attribute_object ($nodeBefore, $nodeAfter)
   };
 }
 
@@ -63,7 +68,7 @@ function locationInfo($parentNode, $node, index) {
   var siblingsInfo = findSiblings($parentNode, $node, index);
 
   return _.extend(siblingsInfo, {
-    // paths to the node itself and the parent
+  // paths to the node itself and the parent
     parentPath: cssPath($parentNode),
     path: $node ? cssPath($node) : undefined,
 
@@ -97,6 +102,58 @@ function grabParentAndIndex($node) {
     return $(n).is($node);
   });
   return {$parent: $parent, index: index};
+}
+
+function merge_element_attribute_to_object($node) {
+  // input: element
+  var return_object = {};
+  if($node[0]['attribs'] && $node[0]['type'] !== "text") {``
+    return_object = $node[0]['attribs'];
+    return_object['label'] = $node[0]['name'];
+  }
+  else if ($node[0]['type'] === "text") {
+    return_object['data'] = $node[0]['data'];
+  }
+  return return_object;
+}
+
+function  diff_attribute_object ($node_before, $node_after) {
+  // if($node_before[0]['type'] === "text" || $node_after[0]['type'] === "text") { return {}; }
+  let before_attrribute = merge_element_attribute_to_object($node_before);
+  let after_attrribute = merge_element_attribute_to_object($node_after);
+
+  let before_keys = Object.keys(before_attrribute);
+  let after_keys = Object.keys(after_attrribute);
+  let keys = _.uniq(before_keys.concat(after_keys));
+  var diff_attribute_result = {};
+  for (var i in keys) 
+  {
+    if (before_attrribute.hasOwnProperty(keys[i]) === true && after_attrribute.hasOwnProperty(keys[i]) === true) {
+      let beforeAttr = before_attrribute[keys[i]];
+      let afterAttr = after_attrribute[keys[i]];
+      var parts = diff.diffChars(beforeAttr, afterAttr);
+      var diff_msg = _.map(parts, function(part) 
+                      {
+                        if (part.added){return '<font class="before">'+part.value+ '</font>';}
+                        else if (part.removed) {return '<font class="after">'+part.value+ '</font>';}
+                        else {return part.value};
+                      }).join("");
+      diff_attribute_result[keys[i]] = {'before': beforeAttr, 'after': afterAttr, 'diff_msg':diff_msg};
+    }
+    
+    else if (before_attrribute.hasOwnProperty(keys[i]) === false && after_attrribute.hasOwnProperty(keys[i]) === true) {
+      diff_attribute_result[keys[i]] = {'before': "", 'after': after_attrribute[keys[i]], };
+    }
+    
+    else if (before_attrribute.hasOwnProperty(keys[i]) === true && after_attrribute.hasOwnProperty(keys[i]) === false) {
+      diff_attribute_result[keys[i]] = {'before': before_attrribute[i], 'after': ""};
+    }
+    
+    else if(before_attrribute.hasOwnProperty(keys[i]) === false && after_attrribute.hasOwnProperty(keys[i]) === false) {
+      continue;
+    }
+  }
+  return diff_attribute_result;
 }
 
 // === colored messages

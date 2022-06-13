@@ -57,7 +57,7 @@ var wait_after_compare_data_and_finish_compare_and_return = function () {
     let after = htmlInit(content_end_in_background)
 
     let result = hiff.compare(before, after);
-    console.log(result)
+
     chrome.runtime.sendMessage
     (
       {

@@ -21,7 +21,7 @@
                             <button class="ensure-tiimer-btn w-100 btn btn-secondary" id="timer-setting-btn">更換timer秒數</button>
                         </div>
                         <div class="col-12">
-                            <div class="result d-flex justify-content-center mt-3" id="timerPrintBox">Timer Setting is 3sec</div>
+                            <div class="result d-flex justify-content-center text-nowrap mt-3" id="timerStatusBox">Timer Setting is 3sec</div>
                         </div>
                         
                     </div>
@@ -36,6 +36,7 @@
                     <input id="control-option1" class="form-check-input" type="checkbox" value="only display 當前選擇元件的變化">
                     <label class="form-check-label" for="flexCheckDefault">only display 當前選擇元件的變化</label>
                 </div>
+
                 <div class="form-check offset-2">
                     <input id="control-option2" class="form-check-input" type="checkbox" value="display 單一tag類別變化" >
                     <label class="form-check-label" for="flexCheckChecked">display 單一tag類別變化</label>
@@ -49,6 +50,7 @@
                     <input id="control-option3" class="form-check-input" type="checkbox" value="是否略過CSS變化">
                     <label class="form-check-label" for="flexCheckChecked">display 單一tag類別變化</label>
                 </div>
+
             </div>
 
             <div class="col-12 col-lg-10 mt-3">
@@ -63,7 +65,10 @@
                             <button class="w-100 btn btn-secondary" id="stopCompare">Stop Compare</button>
                         </div>
                         <div class="col-12">
-                            <div class="result d-flex justify-content-center mt-3" id="timerPrintBox">Compare Status</div>
+                            <div class="result small d-flex justify-content-center text-nowrap mt-3" id="selectingMSG">Is selecting [ XXX ]</div>
+                        </div>
+                        <div class="col-12">
+                            <div class="result d-flex justify-content-center text-nowrap mt-3" id="compareControlBox">Compare Status</div>
                         </div>
                         
                     </div>
@@ -75,7 +80,7 @@
                 <hr class="divider">
                 <div class="html_msg d-flex justify-content-center" id="html_msg">No message.</div>
                 
-                <select class="form-select mb-2" name="compared-result">
+                <select class="form-select mb-2" name="compared-result" id="diffSelectDropdown">
                     <option value="">請選擇查看的元件變化</option>
                     <optgroup id="dropdown-changed-area" label="changed-area">
                         <option disabled>未結果</option>
@@ -90,7 +95,11 @@
             </div>
 
             <div class="col-12 col-lg-10 mt-2">
-                <div id="select-result" class="result d-flex justify-content-center mb-3">select result: -> </div>
+                <div class="col-12">
+                    <button class="w-100 btn btn-secondary" id="testButton">Test Compare Result</button>
+                </div>
+
+                <div id="select-result" class="result d-flex justify-content-center text-nowrap mb-3">select result: -> </div>
 
                 <table class="table table-bordered table-responsive">
                     <thead>
@@ -100,20 +109,27 @@
                         </tr>
                     </thead>
                     <tbody>
+
                         <tr>
-                        <th rowspan='2' scope="row" class="text-center text-nowrap bg-dark bg-opacity-50">attribute1</th>
-                        <td class="">before_value</td>
+                            <th rowspan='3' scope="row" class="text-center text-nowrap bg-dark bg-opacity-50">attribute1</th>
+                            <td class="">before_value</td>
                         </tr>
                         <tr>
-                        <td class="table-secondary">after_value</td>
+                            <td class="table-secondary">after_value</td>
+                        </tr>
+                        <tr>
+                            <td class="table-danger">diff</td>
                         </tr>
 
                         <tr>
-                        <th rowspan='2' scope="row" class="text-center text-nowrap bg-dark bg-opacity-50">attribute2</th>
-                        <td class="">before_value</td>
+                            <th rowspan='3' scope="row" class="text-center text-nowrap bg-dark bg-opacity-50">attribute2</th>
+                            <td class="">before_value</td>
                         </tr>
                         <tr>
-                        <td class="table-secondary">after_value</td>
+                            <td class="table-secondary">after_value</td>
+                        </tr>
+                        <tr>
+                            <td class="table-danger">diff</td>
                         </tr>
 
                         </tr>

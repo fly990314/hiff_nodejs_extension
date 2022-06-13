@@ -40,6 +40,7 @@ var DEFAULT_OPTIONS = {
   ignoreText: []
 };
 
+/// Compares two HTML strings, return a diff object describing the changes, if any.
 function compare(before, after, options) {
   // prepare the options object so we don't have to validate everything down the road
   options = prepareOptions(options);
@@ -47,6 +48,7 @@ function compare(before, after, options) {
   // parse both pieces of HTML with cheerio and get the root nodes
   var $1 = cheerio.load(before);
   var $2 = cheerio.load(after);
+  // function implementation -> $1 = $1( $1.root() ); -> $1.cheerio = $1.root();
   var $n1 = node($1, $1.root());
   var $n2 = node($2, $2.root());
 
@@ -56,28 +58,27 @@ function compare(before, after, options) {
 
   // compare the roots recursively
   var diffObject = compareNodes($n1, $n2, options);
-  //  var changed_set =[], added_set=[], removed_set=[];
-  //  diffObject.changes.forEach((element) => {
-  //   if(element.type == "changed"){
-  //     changed_set.push(element);
-  //   }
-  //   else if(element.type == "added"){
-  //     added_set.push(element);
-  //   }
-  //   else if(element.type == "removed"){
-  //     removed_set.push(element);
-  //   }
-  //  });
+  var isDifferent = !!diffObject.changes
+  var changed_set =[], added_set=[], removed_set=[];
+  if( isDifferent ){
+    diffObject.changes.forEach((element) => 
+      {
+        if(element.type == "changed"){ changed_set.push(element); }
+        else if(element.type == "added"){ added_set.push(element); }
+        else if(element.type == "removed"){ removed_set.push(element); }
+      }
+    );
+  }
 
   // create a meaningful object describing the comparison result
   return {
     // actual results - was it different and what was changed?
-    different: !!diffObject.changes,
+    different: isDifferent,
     changes: diffObject ? diffObject.changes : [],
 
-    // changed_type: changed_set,
-    // added_type: added_set,
-    // remove_type: removed_set,
+    changed_type: changed_set,
+    added_type: added_set,
+    removed_type: removed_set,
     // access to the strings that were compared
     before: before,
     after: after,
