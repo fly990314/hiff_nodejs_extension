@@ -29,6 +29,7 @@ function added($addedNode, $parentBefore, indexBefore, $parentAfter, indexAfter)
     type: "added",
     before: locationInfo($parentBefore, undefined, indexBefore),
     after:  locationInfo($parentAfter, $addedNode, indexAfter),
+    nodeINFO: $addedNode[0],
     message: "Added:    " + colors.green(stringify($addedNode)),
   };
 }
@@ -38,6 +39,7 @@ function removed($removedNode, $parentBefore, indexBefore, $parentAfter, indexAf
     type: "removed",
     before: locationInfo($parentBefore, $removedNode, indexBefore),
     after:  locationInfo($parentAfter, undefined, indexAfter),
+    nodeINFO: $removedNode[0],
     message: "Removed:  " + colors.red(stringify($removedNode))
   };
 }
@@ -56,6 +58,7 @@ function changed($nodeBefore, $nodeAfter) {
     message: "Modified: " + coloredChanges(stringify($nodeBefore), stringify($nodeAfter)),
     before_test: $nodeBefore[0],
     after_test: $nodeAfter[0],
+    nodeINFO: $nodeBefore[0],
     attributeAfter: merge_element_attribute_to_object($nodeAfter),
     attributeBefore: merge_element_attribute_to_object($nodeBefore),
     test: diff_attribute_object ($nodeBefore, $nodeAfter)

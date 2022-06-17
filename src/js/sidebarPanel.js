@@ -3,7 +3,9 @@ import { isNumber } from 'lodash';
 import '../css/sidebarPanel.css';
 import 'bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { load } from 'cheerio';
 const {parse, stringify} = require('flatted/cjs');
+var cheerio = require('cheerio');
 
 // timer part
 const setting_timer_btn = document.getElementById("timer-setting-btn");
@@ -24,6 +26,10 @@ var filter_checkbox_2_result = false;
 var filter_checkbox_2_input_result = "";
 var filter_checkbox_3_result = false;
 
+var changed_set = [];
+var added_set = [];
+var removed_set = [];
+
 // compare control part
 const startCompare_btn = document.getElementById("startCompare");
 const stopCompare_btn = document.getElementById("stopCompare");
@@ -31,7 +37,6 @@ const compare_control_box = document.getElementById("compareControlBox");
 
 // compare result part
 const compare_result_msg = document.getElementById("html_msg");
-const compare_result_select_box = document.getElementById("diffSelectDropdown");
 
 var timer_time = 3;
 var countInterval;
@@ -88,19 +93,15 @@ var time_showing_function = function(actualTime) {
         );
     };
 
-    var update_filter_panel_results = function() {
+var update_filter_panel_results = function() {
     if(filter_checkbox_1.checked) {filter_checkbox_1_result = true;}
         else {filter_checkbox_1_result = false;} 
         if(filter_checkbox_2.checked) {filter_checkbox_2_result = true;}
         else {filter_checkbox_2_result = false;} 
     if(filter_checkbox_3.checked) {filter_checkbox_3_result = true;}
         else {filter_checkbox_3_result = false;}
-    if(filter_tag_input.disable != true) { filter_checkbox_2_input_result = filter_tag_input.value; }
-    // console.log("filter_checkbox_1_result: " + filter_checkbox_1_result);
-    // console.log("filter_checkbox_2_result: " + filter_checkbox_2_result);
-    // console.log("filter_checkbox_3_result: " + filter_checkbox_3_result);
-    // console.log("filter_checkbox_2_inputresult: " + filter_checkbox_2_input_result);
-    
+    if(filter_tag_input.disable != true) { filter_checkbox_2_input_result = (filter_tag_input.value).toLowerCase(); }
+        else { filter_checkbox_2_input_result = ""; }
 }
 
 // listener
@@ -129,7 +130,7 @@ filter_checkbox_2.addEventListener('change', function() {
     } 
     else {
         filter_tag_input.value = "";
-      filter_tag_input.disabled=true;
+        filter_tag_input.disabled=true;
     }
   });
 
@@ -167,15 +168,152 @@ chrome.runtime.onMessage.addListener(
 );
 
 // <Compare result>
-function diffDrpodownUpdate(diffObject) {
+function to_filter_same_tag() {
+    if(filter_checkbox_2_result){
+        for(var i = 0; i < changed_set.length ; i++) {
+            if( changed_set[i].nodeINFO['name'] == filter_checkbox_2_input_result) {
+                changed_set.splice(i, 1);
+            }
+        }
+
+        for(var i = 0; i < added_set.length ; i++) {
+            if( added_set[i].nodeINFO['name'] == filter_checkbox_2_input_result) {
+                added_set.splice(i, 1);
+            }
+        }
+
+        for(var i = 0; i < removed_set.length ; i++) {
+            if( removed_set[i].nodeINFO['name'] == filter_checkbox_2_input_result) {
+                removed_set.splice(i, 1);
+            }
+        }
+    }
+}
+
+// function filter_selecting_element(selecting_element_info) {
+//     chrome.storage.sync.get( ['diff'], function() { console.log("filter storage get: " + result.key)});
+//     console.log("selecting_element: " + parse(selecting_element_info));
+//     // extension  -> get hiff result
+//     // web        -> get current selecting element
+// }
+
+function isElementSame(a, b) {
+    // Object Attribute compare
+    let aAttribute = a.attribs;
+    let bAttribute = b.attribs;
+    let a_attribute_key_list = Object.getOwnPropertyNames(aAttribute);
+    let b_attribute_key_list = Object.getOwnPropertyNames(bAttribute);
+
+    if (a_attribute_key_list.length != b_attribute_key_list.length) {
+        return false;
+    }
+
+    for (var i = 0; i < a_attribute_key_list.length; i++) {
+        var a_attribute_key = a_attribute_key_list[i];
+
+        // If values of same property are not equal,
+        // objects are not equivalent
+        if (aAttribute[a_attribute_key] !== bAttribute[a_attribute_key]) {
+            return false;
+        }
+    }
+
+    // Object type and name compare
+    if(a.type !== b.type || a.name !== b.name) { return false; }
+    
+    // if type, name, attribute all same, return true.
+    return true;
+}
+
+function return_element_innerHTML(node) {
+    return node.outerHTML;
+ }
+
+function load_selecting_element_and_filter_sets(diffObject) {
+    return new Promise((resolve, reject) =>{
+        chrome.devtools.inspectedWindow.eval("(" + return_element_innerHTML.toString() + ")($0)", function (result, isException) {
+            if (!isException && result !== null) {
+                let inited_result = result.replace(/\n/g, "").replace(/    /g, "");
+                // console.log("selecting_element: " + inited_result);
+                let regenerate_node = function merge_element_attribute_to_object($node) {
+                    // input: element
+                    var return_object = {};
+                    if($node['attribs'] && $node['type'] !== "text") {``
+                      return_object = $node['attribs'];
+                      return_object['label'] = $node['name'];
+                    }
+                    else if ($node['type'] === "text") {
+                      return_object['data'] = $node['data'];
+                    }
+                    $node['attribs'] = return_object
+                    return $node;
+                  }
+                console.log("before");
+                let $result = cheerio.load(inited_result);
+                let $element_info =  $result($result.root()).children()['0'];
+                console.log( $element_info );
+                console.log(diffObject);
+                
+                console.log("after");
+                $result = cheerio.load(inited_result);
+                $element_info =  regenerate_node( $result($result.root()).children()['0'] );
+                console.log( $element_info );
+                console.log(diffObject);
+                
+    
+    
+                //比較...
+                // tag, name, attribs是不是都相同 $element_info
+                console.log("start for loop~");
+                for(var i = 0; i < changed_set.length ; i++) {
+                    if(!isElementSame( $element_info, changed_set[i].nodeINFO )) {
+                        console.log("enter same change set~");
+                        changed_set.splice(i, 1);
+                    }
+                }
+    
+                for(var i = 0; i < added_set.length ; i++) {
+                    if(!isElementSame( $element_info, added_set[i].nodeINFO )) {
+                        changed_set.splice(i, 1);
+                    }
+                }
+    
+                for(var i = 0; i < removed_set.length ; i++) {
+                    if(!isElementSame( $element_info, removed_set[i].nodeINFO )) {
+                        changed_set.splice(i, 1);
+                    }
+                }
+                // console.log("change_set in function~");
+                // console.log(changed_set)
+                resolve();
+            }
+        });
+    }) 
+
+}
+
+ async function diffDrpodownUpdate(diffObject) {
+    // console.log("start diffDropdown update! "+ filter_checkbox_2_input_result)
     let changed_area = document.getElementById("dropdown-changed-area");
     let added_area = document.getElementById("dropdown-added-area");
     let removed_area = document.getElementById("dropdown-removed-area");
+    changed_set = diffObject.changed_type;
+    added_set = diffObject.added_type;
+    removed_set = diffObject.removed_type;
+    
+    // // filter1 <select current element>
 
-    let changed_set = diffObject.changed_type;
-    let added_set = diffObject.added_type;
-    let removed_set = diffObject.removed_type;
+    //使用非同步解決方法
+    if(filter_checkbox_1_result)
+    {
+        await load_selecting_element_and_filter_sets(diffObject);
+    }
+    
+    // filter2  <tag>
+    to_filter_same_tag();
 
+    console.log("change_set in out~");
+    console.log(changed_set)
     if(changed_set.length===0){ changed_area.innerHTML = "<option disabled>未結果</option>"; }
     else{
         changed_area.innerHTML = "";
@@ -226,6 +364,7 @@ chrome.storage.onChanged.addListener(
                 let changedNewValue = changes['diff']['newValue'];
                 let parse_result = parse(changedNewValue);
                 diffDrpodownUpdate(parse_result);
+
             }
         }
     }
@@ -240,11 +379,13 @@ test_button.addEventListener('click',
         console.log("click test button");
         const hiff = require('../lib/index.js');
         
-        let html1 = '<div class="123" id="456"></div><button class="2" id="test">111</button>';
-        let html2 = '<p class="000" id="000"></p><button class="1" id="test">222</button>';
+        update_filter_panel_results();
+        let html1 = '<button id="btn-start" class="testClass">Start Compare And Wait 3s</button>';
+        let html2 = '<button id="btn-start" class="nochange">Start Compare And Wait 3s</button>';
+        // let html1 = '<div class="123" id="456"></div><button class="2" id="test">111</button>';
+        // let html2 = '<p class="000" id="000"></p><button class="1" id="test">222</button>';
 
         let result = hiff.compare(html1, html2);
-
         diffDrpodownUpdate(result);
     }
 );
@@ -253,20 +394,17 @@ chrome.devtools.panels.elements.onSelectionChanged.addListener( showSelectElemen
 
 function showSelectElementHTML() {
 
-    chrome.devtools.inspectedWindow.eval("(" + testFunction.toString() + ")($0)", function (result, isException) {
+    chrome.devtools.inspectedWindow.eval("(" + update_current_selecting_element_msg.toString() + ")($0)", function (result, isException) {
         if (!isException && result !== null) {
             filter_selecting_element_msg.innerText = result;
         }
     });
 }
 
-function testFunction(node) {
-    console.log(node.tagName);
+function update_current_selecting_element_msg(node) {
     let head_of_innerHTML, teal_of_innerHTML, content_of_element;
     let outer_content = node.outerHTML.replace(/\n/g, "").replace(/    /g, "");
     let inner_content = node.innerHTML.replace(/\n/g, "").replace(/    /g, "");
-    console.log(outer_content);
-    console.log(inner_content);
 
     if(inner_content === "") {
         first_right_parentheses = outer_content.indexOf(">");
@@ -283,15 +421,14 @@ function testFunction(node) {
         head_of_innerHTML = outer_content.indexOf(inner_content);
         teal_of_innerHTML = head_of_innerHTML + inner_content.length;
         let is_element_Long = (outer_content.slice(0, head_of_innerHTML).length >=50);
-        console.log(head_of_innerHTML);
-        console.log(teal_of_innerHTML);
+
         if(is_element_Long) {
             content_of_element = outer_content.slice(0, 46) + "...>..." + outer_content.slice(teal_of_innerHTML);
         }
         else {
             content_of_element = outer_content.slice(0, head_of_innerHTML) + "..." + outer_content.slice(teal_of_innerHTML);
         }
-        console.log(content_of_element);
+        // console.log(content_of_element);
         return "Is Selecting:\n" + content_of_element;
     }
  }
