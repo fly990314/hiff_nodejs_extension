@@ -13,9 +13,15 @@ module.exports = prepareForDiff;
 function prepareForDiff($node, options) {
   // remove text nodes that don't have text in them
   removeEmptyTextNodes($node);
+  removeScriptElement($node);
   // remove comments if needed
   if (options.ignoreComments)
     removeComments($node);
+
+  // if you need to ignore style attribute
+  if(options.ignoreStyleAttribute) {
+    $node = nghideStyleAttribute($node);
+  }
 
   // recurse into children
   _.each($node.contents(), function (subnode) {
@@ -63,4 +69,23 @@ function removeEmptyTextNodes($node) {
       $node.remove();
     }
   }
+}
+
+function removeScriptElement($node) {
+  // is this a text node?
+  // console.log($node)
+  // console.log($node.type)
+  if ($node[0].type === 'script' && $node[0].name === 'script') {
+    $node.remove();
+  }
+}
+
+function nghideStyleAttribute ($node) {
+  if(nodeType($node) == "element") {
+    if($node[0].attribs.hasOwnProperty("style")) {
+      $node[0].ngstyle = $node[0].attribs.style;
+      delete $node[0].attribs['style'];
+  }
+  }
+  return $node;
 }

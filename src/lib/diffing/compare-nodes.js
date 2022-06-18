@@ -39,7 +39,6 @@ function compareNodes($n1, $n2, options) {
   return result;
 
   // ==========================================================================================
-
   function findDifferences($n1, $n2, options) {
     // determine node types
     var type1 = nodeType($n1), type2 = nodeType($n2);

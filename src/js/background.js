@@ -5,22 +5,7 @@ const {parse, stringify} = require('flatted/cjs');
 var content_start_in_background = "";
 var content_end_in_background = "";
 
-var htmlInit = function diffview_stringAsLines(original_html_content)
-{
-  let start_script_string = "\x3Cscript";
-  let end_script_string = "\x3C/script>";
-  let html_content = original_html_content;
-  html_content = html_content.replace(/\n/g, "").replace(/    /g, "");
-
-  while(html_content.indexOf(start_script_string) != -1 )
-  {
-      let index_start = html_content.indexOf(start_script_string);
-      let index_end = html_content.indexOf(end_script_string);
-      html_content = html_content.slice( 0, index_start) + html_content.slice( index_end + end_script_string.length, html_content.length);
-  }
-
-  return html_content;
-}
+var is_display_option_buffer = false;
 
 var get_after_compare_html = function (){
   chrome.tabs.query
@@ -53,10 +38,10 @@ var wait_after_compare_data_and_finish_compare_and_return = function () {
   } 
   else
   {
-    let before = htmlInit(content_start_in_background);
-    let after = htmlInit(content_end_in_background)
-
-    let result = hiff.compare(before, after);
+    // hiff比較時，會把script類型刪除, 並看使用者需不需要用到style屬性
+    let start_string =  content_start_in_background.replace(/\n/g, "").replace(/    /g, "");
+    let end_string =  content_end_in_background.replace(/\n/g, "").replace(/    /g, "");
+    let result = hiff.compare(start_string, end_string, {ignoreStyleAttribute: is_display_option_buffer});
 
     chrome.runtime.sendMessage
     (
@@ -85,6 +70,7 @@ chrome.runtime.onMessage.addListener(
     let return_sender_startCompare_msg = 'Hi, in background, we finished compared html with start.';
     content_start_in_background = "";
     content_end_in_background = "";
+    is_display_option_buffer = sender_package.payload.hiffOption
 
     console.log( sender_package.payload.message );
     
@@ -122,3 +108,7 @@ chrome.runtime.onMessage.addListener(
     return_sender_response( { } );
   }
 });
+
+// window.onerror = function(message, source, lineno, colno, error) {
+//   console.log(message);
+// }

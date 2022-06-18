@@ -53,46 +53,6 @@ var add_text_node_in_element = function(element, text) {
     element.appendChild(text_tag);
 };
 
-const communicate_with_start_compare = function() {
-    chrome.runtime.sendMessage
-    (
-        {
-            type: 'need_to_save_current_html in background',
-            payload:{ senderLocation: 'mainPanel', message: 'we need to save current html and wait end of compare.' }
-        },
-        response => { }
-    );
-}
-
-const communicate_with_end_compare = function() {
-    chrome.runtime.sendMessage
-    (
-        {
-            type: 'need_to_save_current_html in background and start to compare',
-            payload:{ senderLocation: 'mainPanel', message: 'need to save current html and start to compare HTML of before and after.' }
-        },
-        response => { }
-    );
-}
-
-var time_showing_function = function(actualTime) {
-    let secondsRemaining = actualTime;
-    countInterval = setInterval
-    (
-        function ()
-        {
-            add_text_node_in_element( compare_control_box, `剩下 ${secondsRemaining} sec` );
-            secondsRemaining = secondsRemaining - 1;
-            if (secondsRemaining < 0) 
-            { 
-                clearInterval(countInterval);
-                communicate_with_end_compare();
-                add_text_node_in_element( compare_control_box, "Compare End" );
-            };
-        }, 1000
-        );
-    };
-
 var update_filter_panel_results = function() {
     if(filter_checkbox_1.checked) {filter_checkbox_1_result = true;}
         else {filter_checkbox_1_result = false;} 
@@ -135,14 +95,63 @@ filter_checkbox_2.addEventListener('change', function() {
   });
 
 // <Compare Control>
-startCompare_btn.addEventListener('click', 
-    () => 
-    {
-        chrome.storage.sync.set({'diff': "empty"}, function() { console.log('Value is reset to empty.'); });
+const communicate_with_start_compare = function(isOption) {
+    chrome.runtime.sendMessage
+    (
+        {
+            type: 'need_to_save_current_html in background',
+            payload:{ senderLocation: 'mainPanel', message: 'we need to save current html and wait end of compare.', hiffOption: isOption}
+        },
+        response => { }
+    );
+}
 
+const communicate_with_end_compare = function() {
+    chrome.runtime.sendMessage
+    (
+        {
+            type: 'need_to_save_current_html in background and start to compare',
+            payload:{ senderLocation: 'mainPanel', message: 'need to save current html and start to compare HTML of before and after.' }
+        },
+        response => { }
+    );
+}
+
+var time_showing_function = function(actualTime) {
+    let secondsRemaining = actualTime;
+    // let isDisplayStyle = filter_checkbox_3_result
+
+    return new Promise((resolve,reject)=>{
+        countInterval = setInterval
+        (
+            function ()
+            {
+                add_text_node_in_element( compare_control_box, `剩下 ${secondsRemaining} sec` );
+                secondsRemaining = secondsRemaining - 1;
+                if (secondsRemaining < 0) 
+                { 
+                    clearInterval(countInterval);
+                    add_text_node_in_element( compare_control_box, "Compare End" );
+                    resolve();
+                };
+            }, 
+            1000
+        );
+    });
+}
+
+async function compare_process(timer_wait_time, isOption) {
+    communicate_with_start_compare(isOption);
+    await time_showing_function(timer_wait_time);
+    communicate_with_end_compare();
+}
+
+startCompare_btn.addEventListener('click', 
+    ()=>
+    {
+        chrome.storage.local.set({'diff': "empty"}, function() { console.log('Value is reset to empty.'); });
         update_filter_panel_results();
-        time_showing_function(timer_time);
-        communicate_with_start_compare();
+        compare_process(timer_time, filter_checkbox_3_result);
     }
 );
 
@@ -160,7 +169,7 @@ chrome.runtime.onMessage.addListener(
     {
         if (sender_package.type === 'return_compare_result_to_mainPanel') {
             //Set Local Storage
-            chrome.storage.sync.set({'diff': sender_package.compareResult }, function() { });
+            chrome.storage.local.set({'diff': sender_package.compareResult }, function() { });
 
             return_sender_response( { } );
             }
@@ -189,13 +198,6 @@ function to_filter_same_tag() {
         }
     }
 }
-
-// function filter_selecting_element(selecting_element_info) {
-//     chrome.storage.sync.get( ['diff'], function() { console.log("filter storage get: " + result.key)});
-//     console.log("selecting_element: " + parse(selecting_element_info));
-//     // extension  -> get hiff result
-//     // web        -> get current selecting element
-// }
 
 function isElementSame(a, b) {
     // Object Attribute compare
@@ -234,7 +236,6 @@ function load_selecting_element_and_filter_sets(diffObject) {
         chrome.devtools.inspectedWindow.eval("(" + return_element_innerHTML.toString() + ")($0)", function (result, isException) {
             if (!isException && result !== null) {
                 let inited_result = result.replace(/\n/g, "").replace(/    /g, "");
-                // console.log("selecting_element: " + inited_result);
                 let regenerate_node = function merge_element_attribute_to_object($node) {
                     // input: element
                     var return_object = {};
@@ -248,26 +249,16 @@ function load_selecting_element_and_filter_sets(diffObject) {
                     $node['attribs'] = return_object
                     return $node;
                   }
-                console.log("before");
                 let $result = cheerio.load(inited_result);
                 let $element_info =  $result($result.root()).children()['0'];
-                console.log( $element_info );
-                console.log(diffObject);
-                
-                console.log("after");
+
                 $result = cheerio.load(inited_result);
                 $element_info =  regenerate_node( $result($result.root()).children()['0'] );
-                console.log( $element_info );
-                console.log(diffObject);
-                
-    
-    
+
                 //比較...
                 // tag, name, attribs是不是都相同 $element_info
-                console.log("start for loop~");
                 for(var i = 0; i < changed_set.length ; i++) {
                     if(!isElementSame( $element_info, changed_set[i].nodeINFO )) {
-                        console.log("enter same change set~");
                         changed_set.splice(i, 1);
                     }
                 }
@@ -283,8 +274,6 @@ function load_selecting_element_and_filter_sets(diffObject) {
                         changed_set.splice(i, 1);
                     }
                 }
-                // console.log("change_set in function~");
-                // console.log(changed_set)
                 resolve();
             }
         });
@@ -293,7 +282,6 @@ function load_selecting_element_and_filter_sets(diffObject) {
 }
 
  async function diffDrpodownUpdate(diffObject) {
-    // console.log("start diffDropdown update! "+ filter_checkbox_2_input_result)
     let changed_area = document.getElementById("dropdown-changed-area");
     let added_area = document.getElementById("dropdown-added-area");
     let removed_area = document.getElementById("dropdown-removed-area");
@@ -312,8 +300,6 @@ function load_selecting_element_and_filter_sets(diffObject) {
     // filter2  <tag>
     to_filter_same_tag();
 
-    console.log("change_set in out~");
-    console.log(changed_set)
     if(changed_set.length===0){ changed_area.innerHTML = "<option disabled>未結果</option>"; }
     else{
         changed_area.innerHTML = "";
@@ -350,19 +336,29 @@ function nameOfElement(nodeObject) {
     let beforeParentPath = nodeObject.before.parentPath;
     let afterParentPath = nodeObject.after.parentPath;
 
-    if (beforePath !== undefined) {return beforePath;}
-    else if (afterPath !==undefined) {return afterPath;}
-    else if (beforeParentPath !==undefined) {return beforeParentPath;}
-    else if (afterParentPath !==undefined) {return afterParentPath;}
-    else {return "null";}
+    if(nodeObject.nodeINFO.type === "text") {
+        if (beforePath !== undefined) {return beforePath + " [text]";}
+        else if (afterPath !==undefined) {return afterPath + " [text]";}
+        else if (beforeParentPath !==undefined) {return beforeParentPath + " [text]";}
+        else if (afterParentPath !==undefined) {return afterParentPath + " [text]";}
+        else {return "null";}
+    }
+    else{
+        if (beforePath !== undefined) {return beforePath;}
+        else if (afterPath !==undefined) {return afterPath;}
+        else if (beforeParentPath !==undefined) {return beforeParentPath;}
+        else if (afterParentPath !==undefined) {return afterParentPath;}
+    }
 }
 
 chrome.storage.onChanged.addListener(
     function(changes, areaName) {
-        if(areaName === 'sync'){
+        if(areaName === 'local'){
             if(changes['diff']['newValue'] !== "empty"){
                 let changedNewValue = changes['diff']['newValue'];
                 let parse_result = parse(changedNewValue);
+                console.log("update diff dropdown!!");
+                console.log(parse_result);
                 diffDrpodownUpdate(parse_result);
 
             }
@@ -380,12 +376,22 @@ test_button.addEventListener('click',
         const hiff = require('../lib/index.js');
         
         update_filter_panel_results();
-        let html1 = '<button id="btn-start" class="testClass">Start Compare And Wait 3s</button>';
-        let html2 = '<button id="btn-start" class="nochange">Start Compare And Wait 3s</button>';
-        // let html1 = '<div class="123" id="456"></div><button class="2" id="test">111</button>';
-        // let html2 = '<p class="000" id="000"></p><button class="1" id="test">222</button>';
+        // let html1 = '<button id="btn-start" class="testClass">Start Compare And Wait 3s</button>';
+        // let html2 = '<button id="btn-start" class="nochange">Start Compare And Wait 3s</button>';
 
-        let result = hiff.compare(html1, html2);
+        // test script
+        // let html1 = "<script class='topscriptXXXX'>test</script><div class='testClass'><button class='testButton'>testButton</button><script nonce='VyzdIjQJnOlXYvc6BcgI7g'>if (window.ytcsi) {window.ytcsi.tick('ai', null, '');}</script></div>";
+        // let html2 = "<script class='topscript'>test</script><div class='testClass'><button class='testerror'>testButton</button><script nonce='VyzdIjQJnOlXYvc6BcgI7g'>test</script></div>";
+
+        //test style
+        let html1 = '<div class="testClass" style="testStyle">123</div>';
+        let html2 = '<div class="testClass" style="error">123</div>';
+        // let html1 = '<div class="testClass" style="testStyle"><button style="testSStyle">test</button><button id="btn-start" class="testClass" style="margin-top:1px">Start Compare And Wait 3s</button></div>';
+        // let html2 = '<div class="testClass" style="error"><button style="error">testerror</button><button id="btn-start" class="testClass" style="margin-top:1px">Start Compare And Wait 3s</button></div>';
+        let result = hiff.compare(html1, html2, {ignoreStyleAttribute: true});
+
+        
+        // let result = hiff.compare(html1, html2);
         diffDrpodownUpdate(result);
     }
 );
@@ -428,19 +434,12 @@ function update_current_selecting_element_msg(node) {
         else {
             content_of_element = outer_content.slice(0, head_of_innerHTML) + "..." + outer_content.slice(teal_of_innerHTML);
         }
-        // console.log(content_of_element);
         return "Is Selecting:\n" + content_of_element;
     }
  }
-    // let $ = cheerio.load($0);
-    // let outerHTML = chrome.devtools.inspectedWindow.eval("$0.outerHTML");
-    // let innerHTML = chrome.devtools.inspectedWindow.eval("$0.innerHTML");
-    // console.log(outerHTML);
-    // console.log(innerHTML);
-
-    // let head_of_innerHTML = outerHTML.indexOf(innerHTML);
-    // let teal_of_innerHTML = head_of_innerHTML + innerHTML.length;
-    // let content_of_element = outHTML.slice(0, head_of_innerHTML) + "..." + outHTML.slice(teal_of_innerHTML);
-    // filter_selecting_element_msg.innerText = content_of_element;
 
 // 當inspect頁面有select的動作，就會執行loadLastSelected函式，並套用updateLastSelected函式
+
+window.addEventListener("load", function(event) {
+    showSelectElementHTML();
+  });
