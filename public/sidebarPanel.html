@@ -77,8 +77,8 @@
 
             <div class="col-12 col-lg-10 mt-3">
                 <div class="title d-flex justify-content-center">Compare Result</div>
+
                 <hr class="divider">
-                <div class="html_msg d-flex justify-content-center" id="html_msg">No message.</div>
                 
                 <select class="form-select mb-2" name="compared-result" id="diffSelectDropdown">
                     <option value="">請選擇查看的元件變化</option>
@@ -102,15 +102,15 @@
                 <div id="select-result" class="result d-flex justify-content-center text-nowrap mb-3">select result: -> </div>
 
                 <table class="table table-bordered table-responsive">
-                    <thead>
+                    <thead id="diff_content_title">
                         <tr>
                         <th scope="col" class="first-table bg-dark text-white" >Attribute</th>
                         <th scope="col" class="second-table bg-dark text-white">Value</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody id="diff_content_table">
 
-                        <tr>
+                        <!-- <tr>
                             <th rowspan='3' scope="row" class="text-center text-nowrap bg-dark bg-opacity-50">attribute1</th>
                             <td class="">before_value</td>
                         </tr>
@@ -130,9 +130,8 @@
                         </tr>
                         <tr>
                             <td class="table-danger">diff</td>
-                        </tr>
+                        </tr> -->
 
-                        </tr>
                     </tbody>
                     </table>
 

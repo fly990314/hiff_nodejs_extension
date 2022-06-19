@@ -6,6 +6,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { load } from 'cheerio';
 const {parse, stringify} = require('flatted/cjs');
 var cheerio = require('cheerio');
+var format = require('xml-formatter');
 
 // timer part
 const setting_timer_btn = document.getElementById("timer-setting-btn");
@@ -36,11 +37,15 @@ const stopCompare_btn = document.getElementById("stopCompare");
 const compare_control_box = document.getElementById("compareControlBox");
 
 // compare result part
-const compare_result_msg = document.getElementById("html_msg");
+const compare_result_select_dropdown = document.getElementById("diffSelectDropdown");
+const compare_result_display_table = document.getElementById("diff_content_table");
+const compare_result_display_title = document.getElementById("diff_content_title");
 
 var timer_time = 3;
 var countInterval;
-
+var compare_result_title_for_changed = '<tr><th scope="col" class="first-table bg-dark text-white" >Attribute</th><th scope="col" class="second-table bg-dark text-white">Value</th></tr>';
+var compare_result_title_for_added = '<tr><th scope="col" class="second-table bg-dark text-white">ADD HTML</th></tr>';
+var compare_result_title_for_removed = '<tr><th scope="col" class="second-table bg-dark text-white">REMOVE HTML</th></tr>';
 // tool function
 
 var add_text_node_in_element = function(element, text) {
@@ -180,19 +185,19 @@ chrome.runtime.onMessage.addListener(
 function to_filter_same_tag() {
     if(filter_checkbox_2_result){
         for(var i = 0; i < changed_set.length ; i++) {
-            if( changed_set[i].nodeINFO['name'] == filter_checkbox_2_input_result) {
+            if( changed_set[i].nodeINFO[0]['name'] == filter_checkbox_2_input_result) {
                 changed_set.splice(i, 1);
             }
         }
 
         for(var i = 0; i < added_set.length ; i++) {
-            if( added_set[i].nodeINFO['name'] == filter_checkbox_2_input_result) {
+            if( added_set[i].nodeINFO[0]['name'] == filter_checkbox_2_input_result) {
                 added_set.splice(i, 1);
             }
         }
 
         for(var i = 0; i < removed_set.length ; i++) {
-            if( removed_set[i].nodeINFO['name'] == filter_checkbox_2_input_result) {
+            if( removed_set[i].nodeINFO[0]['name'] == filter_checkbox_2_input_result) {
                 removed_set.splice(i, 1);
             }
         }
@@ -258,19 +263,19 @@ function load_selecting_element_and_filter_sets(diffObject) {
                 //比較...
                 // tag, name, attribs是不是都相同 $element_info
                 for(var i = 0; i < changed_set.length ; i++) {
-                    if(!isElementSame( $element_info, changed_set[i].nodeINFO )) {
+                    if(!isElementSame( $element_info, changed_set[i].nodeINFO[0] )) {
                         changed_set.splice(i, 1);
                     }
                 }
     
                 for(var i = 0; i < added_set.length ; i++) {
-                    if(!isElementSame( $element_info, added_set[i].nodeINFO )) {
+                    if(!isElementSame( $element_info, added_set[i].nodeINFO[0] )) {
                         changed_set.splice(i, 1);
                     }
                 }
     
                 for(var i = 0; i < removed_set.length ; i++) {
-                    if(!isElementSame( $element_info, removed_set[i].nodeINFO )) {
+                    if(!isElementSame( $element_info, removed_set[i].nodeINFO[0] )) {
                         changed_set.splice(i, 1);
                     }
                 }
@@ -336,7 +341,7 @@ function nameOfElement(nodeObject) {
     let beforeParentPath = nodeObject.before.parentPath;
     let afterParentPath = nodeObject.after.parentPath;
 
-    if(nodeObject.nodeINFO.type === "text") {
+    if(nodeObject.nodeINFO[0].type === "text") {
         if (beforePath !== undefined) {return beforePath + " [text]";}
         else if (afterPath !==undefined) {return afterPath + " [text]";}
         else if (beforeParentPath !==undefined) {return beforeParentPath + " [text]";}
@@ -366,7 +371,97 @@ chrome.storage.onChanged.addListener(
     }
   )
 
+compare_result_select_dropdown.addEventListener("change", function(changeResult) {
+    let selectedOptionIndex = compare_result_select_dropdown.selectedIndex;
+    console.log(selectedOptionIndex)
+    let changed_set_length = changed_set.length;
+    let added_set_length = added_set.length;
+    let removed_set_length = removed_set.length;
+    let buffer=0;
+
+    if(selectedOptionIndex == 0) {
+        compare_result_display_table.innerHTML = compare_result_title_for_changed;
+        compare_result_display_table.innerHTML = "";
+        return;
+    }
+
+    // changed set
+    if ( changed_set_length != 0 && selectedOptionIndex <= (buffer + changed_set_length) ) {
+        let index = selectedOptionIndex-1;
+        let changed_diff_list = changed_set[index].diff_attr_result;
+        let changed_diff_keys = Object.keys(changed_diff_list);
+        let total_innerHTML = "";
+        compare_result_display_table.innerHTML = compare_result_title_for_changed;
+        for(var i=0; i < changed_diff_keys.length; i++) {
+            let attributeName = changed_diff_keys[i];
+            let before_value = changed_diff_list[changed_diff_keys[i]]['before'];
+            let after_value = changed_diff_list[changed_diff_keys[i]]['after'];
+            let diff = changed_diff_list[changed_diff_keys[i]]['diff_msg'];
+            let innerHTML_for_changed = "<tr><th rowspan='3' scope='row' class='text-center text-nowrap bg-dark bg-opacity-50'>"
+                + attributeName + "</th><td>" + before_value +"</td></tr><tr><td class='table-secondary'>" + after_value 
+                + "</td></tr><tr><td class='table-danger'>" + diff + "</td></tr>"
+            total_innerHTML += innerHTML_for_changed;
+        }
+
+        // implementation
+        compare_result_display_table.innerHTML = total_innerHTML;
+        return;
+    }
+    else if (changed_set_length == 0) {
+        buffer += 1
+    }
+
+    buffer += changed_set_length;
+
+    console.log(buffer);
+    console.log(added_set_length);
+    console.log(selectedOptionIndex);
+    console.log(buffer + added_set_length);
+
+    // added set
+    if ( added_set_length != 0 && selectedOptionIndex <= (buffer + added_set_length) ) {
+        let index = selectedOptionIndex - buffer-1;
+        let addedElementHTML = format(added_set[index].contentHTML);
+        compare_result_display_title.innerHTML = compare_result_title_for_added;
+        compare_result_display_table.innerHTML = "<tr><td id='addedHTML'></td><tr>";
+        let addedContent = document.getElementById("addedHTML");
+        addedContent.textContent = addedElementHTML;
+        console.log("finish added set~");
+        // implementation
+        return ;
+    }
+    else if (added_set_length == 0) {
+        buffer += 1
+    }
+    
+    buffer += added_set_length;
+
+    // remove set
+    if ( removed_set_length != 0 && selectedOptionIndex <= (buffer + removed_set_length) ) {
+        let index = selectedOptionIndex - buffer-1;
+        let removedElementHTML = format(added_set[index].contentHTML);
+        compare_result_display_title.innerHTML = compare_result_title_for_removed;
+        compare_result_display_table.innerHTML = "<tr><td id='removedHTML'></td><tr>";
+        let removedContent = document.getElementById("removedHTML");
+        removedContent.textContent = removedElementHTML;
+        return;
+    }
+    else if (removed_set_length == 0) {
+        buffer += 1
+    }
+
+    //超過全部種類數量總和
+    if(selectedOptionIndex > buffer + removed_set_length) {
+        console.log("table error!!!");
+        return;
+    }
+});
+
+// ---------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------
 // test area
+// ---------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------
 const test_button = document.getElementById("testButton");
 
 test_button.addEventListener('click', 
@@ -384,11 +479,19 @@ test_button.addEventListener('click',
         // let html2 = "<script class='topscript'>test</script><div class='testClass'><button class='testerror'>testButton</button><script nonce='VyzdIjQJnOlXYvc6BcgI7g'>test</script></div>";
 
         //test style
-        let html1 = '<div class="testClass" style="testStyle">123</div>';
-        let html2 = '<div class="testClass" style="error">123</div>';
+        // let html1 = '<div class="testClass" style="testStyle">123</div>';
+        // let html2 = '<div class="testClass" style="error">123</div>';
+        
+        // test add part
+        let html1 = '<div class="testClass" style="testStyle"></div>';
+        let html2 = '<div class="testClass" style="testStyle"><div class="addElement" id="test">123</div></div>';
+
         // let html1 = '<div class="testClass" style="testStyle"><button style="testSStyle">test</button><button id="btn-start" class="testClass" style="margin-top:1px">Start Compare And Wait 3s</button></div>';
         // let html2 = '<div class="testClass" style="error"><button style="error">testerror</button><button id="btn-start" class="testClass" style="margin-top:1px">Start Compare And Wait 3s</button></div>';
         let result = hiff.compare(html1, html2, {ignoreStyleAttribute: true});
+        
+        console.log(result);
+        console.log(result.added_type[0].contentHTML);
 
         
         // let result = hiff.compare(html1, html2);
@@ -439,6 +542,7 @@ function update_current_selecting_element_msg(node) {
  }
 
 // 當inspect頁面有select的動作，就會執行loadLastSelected函式，並套用updateLastSelected函式
+
 
 window.addEventListener("load", function(event) {
     showSelectElementHTML();

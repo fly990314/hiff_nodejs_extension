@@ -13,7 +13,7 @@ var nodeType = require('../util/cheerio-utils').nodeType;
  * @param $node the cheerio object for the node
  * @returns {string} a printable string
  */
-function stringifyNode($node) {
+function stringifyNode($node, isShort=true) {
   if (!$node || !$node.length)
     return "[nothing]";
 
@@ -31,9 +31,9 @@ function stringifyNode($node) {
       // shorten HTML if necessary
       var originalHTML = $clone.html();
       // if (originalHTML && originalHTML.length > 80)
-      if (originalHTML)
+      if (originalHTML && isShort===true){
         $clone.html("...");
-
+      }
       return $.html($clone);
   }
 }

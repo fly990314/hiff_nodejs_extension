@@ -7,6 +7,7 @@ var diff = require('diff');
 var stringify = require('../display/stringify-node');
 var cssPath = require('../util/css-path');
 var node = require('../util/cheerio-utils').node;
+var nodeType = require('../util/cheerio-utils').nodeType;
 var safeParent = require('../util/cheerio-utils').safeParent;
 
 module.exports = {
@@ -23,14 +24,14 @@ module.exports = {
 };
 
 // ==========================================================
-
 function added($addedNode, $parentBefore, indexBefore, $parentAfter, indexAfter) {
   return {
     type: "added",
     before: locationInfo($parentBefore, undefined, indexBefore),
     after:  locationInfo($parentAfter, $addedNode, indexAfter),
-    nodeINFO: $addedNode[0],
-    message: "Added:    " + colors.green(stringify($addedNode)),
+    nodeINFO: $addedNode,
+    contentHTML: stringify($addedNode, false),
+    // message: "Added:    " + colors.green(stringify($addedNode, true)),
   };
 }
 
@@ -39,8 +40,9 @@ function removed($removedNode, $parentBefore, indexBefore, $parentAfter, indexAf
     type: "removed",
     before: locationInfo($parentBefore, $removedNode, indexBefore),
     after:  locationInfo($parentAfter, undefined, indexAfter),
-    nodeINFO: $removedNode[0],
-    message: "Removed:  " + colors.red(stringify($removedNode))
+    nodeINFO: $removedNode,
+    contentHTML: stringify($removedNode, false),
+    // message: "Removed:  " + colors.red(stringify($removedNode, true))
   };
 }
 
@@ -55,13 +57,11 @@ function changed($nodeBefore, $nodeAfter) {
     type: "changed",
     before: locationInfo(before.$parent, $nodeBefore, before.index),
     after: locationInfo(after.$parent, $nodeAfter, after.index),
-    message: "Modified: " + coloredChanges(stringify($nodeBefore), stringify($nodeAfter)),
-    before_test: $nodeBefore[0],
-    after_test: $nodeAfter[0],
-    nodeINFO: $nodeBefore[0],
+    nodeINFO: $nodeBefore,
     attributeAfter: merge_element_attribute_to_object($nodeAfter),
     attributeBefore: merge_element_attribute_to_object($nodeBefore),
-    test: diff_attribute_object ($nodeBefore, $nodeAfter)
+    diff_attr_result: diff_attribute_object ($nodeBefore, $nodeAfter),
+    // message: "Modified: " + coloredChanges(stringify($nodeBefore, true), stringify($nodeAfter, true)),
   };
 }
 
@@ -134,22 +134,32 @@ function  diff_attribute_object ($node_before, $node_after) {
     if (before_attrribute.hasOwnProperty(keys[i]) === true && after_attrribute.hasOwnProperty(keys[i]) === true) {
       let beforeAttr = before_attrribute[keys[i]];
       let afterAttr = after_attrribute[keys[i]];
-      var parts = diff.diffChars(beforeAttr, afterAttr);
-      var diff_msg = _.map(parts, function(part) 
+      let parts = diff.diffChars(beforeAttr, afterAttr);
+      let diff_msg = "";
+      // 如果attribute value不同，才需要比對，不然diff_msg會為空值
+      if (beforeAttr !==afterAttr) {
+        diff_msg = _.map(parts, function(part) 
                       {
                         if (part.added){return '<font class="before">'+part.value+ '</font>';}
                         else if (part.removed) {return '<font class="after">'+part.value+ '</font>';}
                         else {return part.value};
                       }).join("");
+        diff_msg = "[Diff] " + diff_msg;
+      }
+      else {
+        diff_msg = "[Same]";
+      }
       diff_attribute_result[keys[i]] = {'before': beforeAttr, 'after': afterAttr, 'diff_msg':diff_msg};
     }
     
     else if (before_attrribute.hasOwnProperty(keys[i]) === false && after_attrribute.hasOwnProperty(keys[i]) === true) {
-      diff_attribute_result[keys[i]] = {'before': "", 'after': after_attrribute[keys[i]], };
+      let diff_msg = "[Add] " + '<font class="after">'+after_attrribute[keys[i]]+ '</font>';
+      diff_attribute_result[keys[i]] = {'before': "", 'after': after_attrribute[keys[i]], 'diff_msg': diff_msg};
     }
     
     else if (before_attrribute.hasOwnProperty(keys[i]) === true && after_attrribute.hasOwnProperty(keys[i]) === false) {
-      diff_attribute_result[keys[i]] = {'before': before_attrribute[i], 'after': ""};
+      let diff_msg = "[Remove] " + '<font class="before">'+before_attrribute[keys[i]]+ '</font>';
+      diff_attribute_result[keys[i]] = {'before': before_attrribute[keys[i]], 'after': "", 'diff_msg': diff_msg};
     }
     
     else if(before_attrribute.hasOwnProperty(keys[i]) === false && after_attrribute.hasOwnProperty(keys[i]) === false) {

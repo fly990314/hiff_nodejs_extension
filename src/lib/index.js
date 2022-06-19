@@ -84,8 +84,6 @@ function compare(before, after, options) {
     after: after,
 
     // cheerioed copies of the strings, for making working with changes easy
-    $load_before: $1,
-    $load_after: $2,
     $diff_before: $n1,
     $diff_after: $n2,
   };
