@@ -8,6 +8,13 @@ const {parse, stringify} = require('flatted/cjs');
 var cheerio = require('cheerio');
 var format = require('xml-formatter');
 
+// extension 
+const tool_illustrate_hide_display_button = document.getElementById("hide-display-illustrate-btn");
+const illustrate_cintent = '<p class="step">STEP1 :</p><p class="stepContent">Select the options that you want.</p>'
+                            + '<p class="step">STEP2 :</p><p class="stepContent">Select time of timer and show in the box..</p>'
+                            + '<p class="step">STEP3 :</p><p class="stepContent">Click button to start compare and wait timer to the end.</p>'
+                            + '<p class="step">STEP4 :</p><p class="stepContent">Select dropdown option and show the attribbute result in the table.</p>'
+
 // timer part
 const setting_timer_btn = document.getElementById("timer-setting-btn");
 const timer_input_field = document.getElementById("timer-input");
@@ -18,14 +25,14 @@ const timerStatusBox = document.getElementById("timerStatusBox");
 const filter_checkbox_1 = document.getElementById("control-option1");
 const filter_checkbox_2 = document.getElementById("control-option2");
 const filter_checkbox_3 = document.getElementById("control-option3");
-const filter_tag_input = document.getElementById("control-option2-input");
+const filter_tag_input = document.getElementById("control-option3-input");
 
 const filter_selecting_element_msg = document.getElementById("selectingMSG");
 
 var filter_checkbox_1_result = false;
 var filter_checkbox_2_result = false;
-var filter_checkbox_2_input_result = "";
 var filter_checkbox_3_result = false;
+var filter_checkbox_3_input_result = "";
 
 var changed_set = [];
 var added_set = [];
@@ -65,11 +72,38 @@ var update_filter_panel_results = function() {
         else {filter_checkbox_2_result = false;} 
     if(filter_checkbox_3.checked) {filter_checkbox_3_result = true;}
         else {filter_checkbox_3_result = false;}
-    if(filter_tag_input.disable != true) { filter_checkbox_2_input_result = (filter_tag_input.value).toLowerCase(); }
-        else { filter_checkbox_2_input_result = ""; }
+    if(filter_tag_input.disable != true) { filter_checkbox_3_input_result = (filter_tag_input.value).toLowerCase(); }
+        else { filter_checkbox_3_input_result = ""; }
+    console.log("1: " + filter_checkbox_1_result);
+    console.log("2: " + filter_checkbox_2_result);
+    console.log("3: " + filter_checkbox_3_result);
+    console.log("3(input): " + filter_checkbox_3_input_result);
+    
 }
 
 // listener
+// illustrate
+tool_illustrate_hide_display_button.addEventListener('click',
+    () =>
+    {
+        console.log("click");
+        let intro_illustrate_element = document.getElementById("intro-text")
+        let innerHTML = intro_illustrate_element.innerHTML.replace(/\n/g, "").replace(/    /g, "");
+        console.log(innerHTML);
+        console.log(illustrate_cintent);
+        console.log(innerHTML === illustrate_cintent)
+        if(innerHTML === illustrate_cintent) {
+            intro_illustrate_element.innerHTML = "";
+            tool_illustrate_hide_display_button.textContent = "Open Illustrate" 
+
+        }
+        else if (innerHTML === ""){
+            intro_illustrate_element.innerHTML = illustrate_cintent;
+            tool_illustrate_hide_display_button.textContent = "Hide Illustrate";
+        }
+    }
+);
+
 // <timer>
 setting_timer_btn.addEventListener('click', 
     () => 
@@ -89,7 +123,7 @@ setting_timer_btn.addEventListener('click',
 );
 
 // <compare filter>
-filter_checkbox_2.addEventListener('change', function() {
+filter_checkbox_3.addEventListener('change', function() {
     if (this.checked) {
         filter_tag_input.disabled=false;
     } 
@@ -183,21 +217,21 @@ chrome.runtime.onMessage.addListener(
 
 // <Compare result>
 function to_filter_same_tag() {
-    if(filter_checkbox_2_result){
+    if(filter_checkbox_3_result){
         for(var i = 0; i < changed_set.length ; i++) {
-            if( changed_set[i].nodeINFO[0]['name'] == filter_checkbox_2_input_result) {
+            if( changed_set[i].nodeINFO[0]['name'] == filter_checkbox_3_input_result) {
                 changed_set.splice(i, 1);
             }
         }
 
         for(var i = 0; i < added_set.length ; i++) {
-            if( added_set[i].nodeINFO[0]['name'] == filter_checkbox_2_input_result) {
+            if( added_set[i].nodeINFO[0]['name'] == filter_checkbox_3_input_result) {
                 added_set.splice(i, 1);
             }
         }
 
         for(var i = 0; i < removed_set.length ; i++) {
-            if( removed_set[i].nodeINFO[0]['name'] == filter_checkbox_2_input_result) {
+            if( removed_set[i].nodeINFO[0]['name'] == filter_checkbox_3_input_result) {
                 removed_set.splice(i, 1);
             }
         }
@@ -413,11 +447,6 @@ compare_result_select_dropdown.addEventListener("change", function(changeResult)
 
     buffer += changed_set_length;
 
-    console.log(buffer);
-    console.log(added_set_length);
-    console.log(selectedOptionIndex);
-    console.log(buffer + added_set_length);
-
     // added set
     if ( added_set_length != 0 && selectedOptionIndex <= (buffer + added_set_length) ) {
         let index = selectedOptionIndex - buffer-1;
@@ -426,7 +455,6 @@ compare_result_select_dropdown.addEventListener("change", function(changeResult)
         compare_result_display_table.innerHTML = "<tr><td id='addedHTML'></td><tr>";
         let addedContent = document.getElementById("addedHTML");
         addedContent.textContent = addedElementHTML;
-        console.log("finish added set~");
         // implementation
         return ;
     }

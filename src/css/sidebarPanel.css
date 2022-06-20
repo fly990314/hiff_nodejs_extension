@@ -1,43 +1,93 @@
-/* normalize css starts here */
-.item {
-  background-color: firebrick;
+header {
+  background-color: rgb(50, 50, 50);
+  background-repeat: none;
+  background-attachment: scroll;
+  background-position: center center;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  background-size: cover;
+  -o-background-size: cover;
+  text-align: center;
+  color: rgb(255, 255, 255);
 }
 
-.btn:hover {
-  transform: scale(1.05);
+header .intro-title {
+  text-transform: uppercase;
+  font-family: "Playfair Display",sans-serif;
+  font-weight:bold;
+  font-style: italic;
+  font-size: 16px;
+  margin-bottom: 5px;
 }
 
-.divider {
-  margin: 0px auto 10px;
-  width: 100%;
-  border: 4px solid #000;
-  opacity: 0.4;
+header .intro-overview .step{
+  font-weight:bold;
+  font-size: 10px;
+  line-height: 6px;
+  margin-bottom: 5px;
 }
 
+header .intro-overview .stepContent{
+  font-size: 10px;
+  line-height: 6px;
+  margin-bottom: 10px;
+}
+
+.hide-step-btn {
+  font-size: 10px;
+  width: 120px;
+  border-radius: 16px;
+  margin-bottom: 5px;
+}
+
+@media (min-width: 768px) {
+  header {
+      padding-top: 20px;
+      padding-bottom: 8px;
+  }
+
+  header .intro-title {
+    font-family: "Playfair Display",sans-serif;
+    font-style: italic;
+    font-size: 24px;
+    line-height: 10px;
+    margin-bottom: 20px;
+}
+
+  header .intro-overview .step{
+      font-weight:bold;
+      font-size: 12px;
+      line-height: 6px;
+      margin-bottom: 5px;
+  }
+  
+  header .intro-overview .stepContent{
+      font-size: 12px;
+      line-height: 6px;
+      margin-bottom: 12px;
+  }
+}
+
+/* step1 */
 .title {
-font-size:20px;
-font-weight:bold;
-font-family: sans-serif, "Noto Sans CJK TC", "Microsoft JhengHei", PingFang, STHeiti, serif;
-text-decoration: underline;
-background-color: rgb(255, 200, 148);
+  font-size: 20px;
+  font-weight: bold;
+  margin-top: 5px;
+  font-family: sans-serif, "Noto Sans CJK TC", "Microsoft JhengHei", PingFang, STHeiti, serif;
+  text-decoration: underline;
+  color: rgb(255, 255, 255);
+  background-color: rgb(121, 123, 192);
+}
+
+.option-text {
+  font-size: 12px;
+  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  vertical-align: 5%;
 }
 
 .result {
-  display: inline-block;
-  width: 100%;
-  height: 56px;
-  font-size: 16px;
-  border:3px rgb(124, 150, 236) dashed;
-  margin: 4px 4px 4px 4px;
-  padding: 5px 5px;
-  font-size:16px;
-  font-family: monospace, "Noto Sans CJK TC", "Microsoft JhengHei", PingFang, STHeiti, sans-serif, serif;
+  font-family: "Comic Sans MS", "Comic Sans", cursive;
 }
-
-/* table{
-  display: table;
-  table-layout:fixed;
-} */
 
 .first-table{
 width: 20%;

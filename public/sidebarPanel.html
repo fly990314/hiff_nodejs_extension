@@ -7,18 +7,57 @@
   <link rel="stylesheet" href="./sidebarPanel.css" />
 </head>
 <body>
-    <div class="container">
+    <header>
+        <div class="intro-title">HTML Compare Tool</div>
+
+        <div class="intro-overview" id="intro-text">
+            <p class="step">STEP1 :</p><p class="stepContent">Select the options that you want.</p>
+            <p class="step">STEP2 :</p><p class="stepContent">Select time of timer and show in the box..</p>
+            <p class="step">STEP3 :</p><p class="stepContent">Click button to start compare and wait timer to the end.</p>
+            <p class="step">STEP4 :</p><p class="stepContent">Select dropdown option and show the attribbute result in the table.</p>
+        </div>
+
+        <button id="hide-display-illustrate-btn" class='hide-step-btn'>Hide Illustrate</button>
+    </header>
+
+    <div class="setting">
         <div class="row justify-content-center">
             <div class="col-12 col-lg-5">
-                <div class="title d-flex justify-content-center">Timer</div>
-                <hr class="divider">
+                <div class="title d-flex justify-content-center mb-2">Compare Filter</div>
+
+                <div class="form-check offset-2">
+                    <input id="control-option1" class="form-check-input" type="checkbox" value="only display 當前選擇元件的變化">
+                    <label class="form-check-label option-text" for="flexCheckDefault">only display 當前選擇元件的變化</label>
+                </div>
+
+                <div class="form-check offset-2">
+                    <input id="control-option2" class="form-check-input" type="checkbox" value="是否略過CSS變化">
+                    <label class="form-check-label option-text" for="flexCheckChecked">是否略過CSS變化</label>
+                </div>
+
+                <div class="row">
+                    <div class="col-6 offset-1">
+                        <div class="form-check offset-2">
+                            <input id="control-option3" class="form-check-input" type="checkbox" value="display 單一tag類別變化" >
+                            <label class="form-check-label option-text" for="flexCheckChecked">display 單一tag類別變化</label>
+                        </div>
+                    </div>
+                    <div class="col-5">
+                        <input id="control-option3-input" class="form-control form-control-sm" type="text" placeholder="輸入需要展示Tag類別" aria-label="Disabled input example" disabled>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-12 col-lg-5">
+                <div class="title d-flex justify-content-center mb-3">Timer</div>
                 <div class="container-fluid">
                     <div class="row justify-content-center">
                         <div class="col-5">
                             <input class="form-control w-100" id="timer-input" type="text" placeholder="輸入timer秒數">
                         </div>
                         <div class="col-5">
-                            <button class="ensure-tiimer-btn w-100 btn btn-secondary" id="timer-setting-btn">更換timer秒數</button>
+                            <button class="ensure-timer-btn w-100 btn btn-secondary" id="timer-setting-btn">更換timer秒數</button>
                         </div>
                         <div class="col-12">
                             <div class="result d-flex justify-content-center text-nowrap mt-3" id="timerStatusBox">Timer Setting is 3sec</div>
@@ -26,42 +65,18 @@
                         
                     </div>
                 </div>
-            </div>
+            </div> 
+        </div>
 
-            <div class="col-12 col-lg-5 mt-3 mt-lg-0">
-                <div class="title d-flex justify-content-center">Compare Filter</div>
-                <hr class="divider">
-
-                <div class="form-check offset-2">
-                    <input id="control-option1" class="form-check-input" type="checkbox" value="only display 當前選擇元件的變化">
-                    <label class="form-check-label" for="flexCheckDefault">only display 當前選擇元件的變化</label>
-                </div>
-
-                <div class="form-check offset-2">
-                    <input id="control-option2" class="form-check-input" type="checkbox" value="display 單一tag類別變化" >
-                    <label class="form-check-label" for="flexCheckChecked">display 單一tag類別變化</label>
-                </div>
-
-                <div class="offset-2">
-                    <input id="control-option2-input" class="form-control" type="text" placeholder="輸入需要展示Tag類別" aria-label="Disabled input example" disabled>
-                </div>
-
-                <div class="form-check offset-2">
-                    <input id="control-option3" class="form-check-input" type="checkbox" value="是否略過CSS變化">
-                    <label class="form-check-label" for="flexCheckChecked">是否略過CSS變化</label>
-                </div>
-
-            </div>
-
+        <div class="row justify-content-center">
             <div class="col-12 col-lg-10 mt-3">
-                <div class="title d-flex justify-content-center">Compared Control</div>
-                <hr class="divider">
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="col-6">
+                <div class="title d-flex justify-content-center mb-2">Compared Control</div>
+
+                    <div class="row justify-content-center">
+                        <div class="col-4">
                             <button class="w-100 btn btn-secondary" id="startCompare">Start Compare</button>
                         </div>
-                        <div class="col-6">
+                        <div class="col-4">
                             <button class="w-100 btn btn-secondary" id="stopCompare">Stop Compare</button>
                         </div>
                         <div class="col-12">
@@ -70,15 +85,15 @@
                         <div class="col-12">
                             <div class="result d-flex justify-content-center text-nowrap mt-3" id="compareControlBox">Compare Status</div>
                         </div>
-                        
                     </div>
+
                 </div>
             </div>
+        </div>
 
+        <div class="row justify-content-center">
             <div class="col-12 col-lg-10 mt-3">
-                <div class="title d-flex justify-content-center">Compare Result</div>
-
-                <hr class="divider">
+                <div class="title d-flex justify-content-center mb-2">Compare Result</div>
                 
                 <select class="form-select mb-2" name="compared-result" id="diffSelectDropdown">
                     <option value="">請選擇查看的元件變化</option>
@@ -93,8 +108,12 @@
                     </optgroup>
                 </select>
             </div>
-
+        </div>
+        
+        <div class="row justify-content-center">
             <div class="col-12 col-lg-10 mt-2">
+                
+                <!-- Test -->
                 <div class="col-12">
                     <button class="w-100 btn btn-secondary" id="testButton">Test Compare Result</button>
                 </div>
@@ -102,40 +121,24 @@
                 <div id="select-result" class="result d-flex justify-content-center text-nowrap mb-3">select result: -> </div>
 
                 <table class="table table-bordered table-responsive">
+
                     <thead id="diff_content_title">
                         <tr>
                         <th scope="col" class="first-table bg-dark text-white" >Attribute</th>
                         <th scope="col" class="second-table bg-dark text-white">Value</th>
                         </tr>
                     </thead>
+
                     <tbody id="diff_content_table">
 
-                        <!-- <tr>
-                            <th rowspan='3' scope="row" class="text-center text-nowrap bg-dark bg-opacity-50">attribute1</th>
-                            <td class="">before_value</td>
-                        </tr>
-                        <tr>
-                            <td class="table-secondary">after_value</td>
-                        </tr>
-                        <tr>
-                            <td class="table-danger">diff</td>
-                        </tr>
-
-                        <tr>
-                            <th rowspan='3' scope="row" class="text-center text-nowrap bg-dark bg-opacity-50">attribute2</th>
-                            <td class="">before_value</td>
-                        </tr>
-                        <tr>
-                            <td class="table-secondary">after_value</td>
-                        </tr>
-                        <tr>
-                            <td class="table-danger">diff</td>
-                        </tr> -->
-
                     </tbody>
-                    </table>
+
+                </table>
 
             </div>
+        </div>
+
+    </div>
             <!-- 第一個問題比較容易解決，可以用 Bootstrap 中提供的 .text-nowrap 來避免表格欄位標頭換行即可。 -->
     <script src="sidebarPanel.js"></script>
 </body>

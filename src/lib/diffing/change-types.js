@@ -120,7 +120,7 @@ function merge_element_attribute_to_object($node) {
   return return_object;
 }
 
-function  diff_attribute_object ($node_before, $node_after) {
+function diff_attribute_object ($node_before, $node_after) {
   // if($node_before[0]['type'] === "text" || $node_after[0]['type'] === "text") { return {}; }
   let before_attrribute = merge_element_attribute_to_object($node_before);
   let after_attrribute = merge_element_attribute_to_object($node_after);
