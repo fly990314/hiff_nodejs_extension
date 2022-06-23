@@ -140,8 +140,9 @@ function diff_attribute_object ($node_before, $node_after) {
       if (beforeAttr !==afterAttr) {
         diff_msg = _.map(parts, function(part) 
                       {
-                        if (part.added){return '<font class="before">'+part.value+ '</font>';}
-                        else if (part.removed) {return '<font class="after">'+part.value+ '</font>';}
+                        // before and after -> add是before到after有增加東西，增加的東西是after的
+                        if (part.added){return '<font class="after">'+part.value+ '</font>';}
+                        else if (part.removed) {return '<font class="before">'+part.value+ '</font>';}
                         else {return part.value};
                       }).join("");
         diff_msg = "[Diff] " + diff_msg;
@@ -153,12 +154,12 @@ function diff_attribute_object ($node_before, $node_after) {
     }
     
     else if (before_attrribute.hasOwnProperty(keys[i]) === false && after_attrribute.hasOwnProperty(keys[i]) === true) {
-      let diff_msg = "[Add] " + '<font class="after">'+after_attrribute[keys[i]]+ '</font>';
+      let diff_msg = "[Add] " + '<font class="before">'+after_attrribute[keys[i]]+ '</font>';
       diff_attribute_result[keys[i]] = {'before': "", 'after': after_attrribute[keys[i]], 'diff_msg': diff_msg};
     }
     
     else if (before_attrribute.hasOwnProperty(keys[i]) === true && after_attrribute.hasOwnProperty(keys[i]) === false) {
-      let diff_msg = "[Remove] " + '<font class="before">'+before_attrribute[keys[i]]+ '</font>';
+      let diff_msg = "[Remove] " + '<font class="after">'+before_attrribute[keys[i]]+ '</font>';
       diff_attribute_result[keys[i]] = {'before': before_attrribute[keys[i]], 'after': "", 'diff_msg': diff_msg};
     }
     

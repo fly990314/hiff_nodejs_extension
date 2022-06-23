@@ -10,131 +10,146 @@
     <header>
         <div class="intro-title">HTML Compare Tool</div>
 
-        <div class="intro-overview" id="intro-text">
-            <p class="step">STEP1 :</p><p class="stepContent">Select the options that you want.</p>
-            <p class="step">STEP2 :</p><p class="stepContent">Select time of timer and show in the box..</p>
-            <p class="step">STEP3 :</p><p class="stepContent">Click button to start compare and wait timer to the end.</p>
-            <p class="step">STEP4 :</p><p class="stepContent">Select dropdown option and show the attribbute result in the table.</p>
-        </div>
+        <div class="intro-overview" id="intro-text"></div>
 
-        <button id="hide-display-illustrate-btn" class='hide-step-btn'>Hide Illustrate</button>
+        <button id="hide-display-illustrate-btn" class='hide-step-btn'>Open Illustrate</button>
     </header>
 
-    <div class="setting">
+    <div class="setting container-fluid">
         <div class="row justify-content-center">
+            <div class="col-12 col-lg-5">
+                <div class="title d-flex justify-content-center mb-2">Timer</div>
+
+                <div class="row justify-content-center">
+                    <div class="col-5 mt-lg-4">
+                        <input class="form-control w-100" id="timer-input" type="text" placeholder="input time">
+                    </div>
+                    <div class="col-5 mt-lg-4">
+                        <button class="ensure-timer-btn w-100 btn btn-secondary" id="timer-setting-btn">Change Time Of Timer</button>
+                    </div>
+                </div>
+            </div>
             <div class="col-12 col-lg-5">
                 <div class="title d-flex justify-content-center mb-2">Compare Filter</div>
 
-                <div class="form-check offset-2">
-                    <input id="control-option1" class="form-check-input" type="checkbox" value="only display 當前選擇元件的變化">
-                    <label class="form-check-label option-text" for="flexCheckDefault">only display 當前選擇元件的變化</label>
+                <div class="form-check offset-1">
+                    <input id="control-option1" class="form-check-input" type="checkbox" value="Ignore style attribute's change">
+                    <label class="form-check-label option-text" for="control-option1">Ignore style attribute's change</label>
                 </div>
 
-                <div class="form-check offset-2">
-                    <input id="control-option2" class="form-check-input" type="checkbox" value="是否略過CSS變化">
-                    <label class="form-check-label option-text" for="flexCheckChecked">是否略過CSS變化</label>
+                <div class="form-check offset-1">
+                    <input id="control-option2" class="form-check-input" type="checkbox" value="Only display change of current selecting elemnt">
+                    <label class="form-check-label option-text" for="control-option2">Only display change of current selecting elemnt</label>
                 </div>
 
                 <div class="row">
-                    <div class="col-6 offset-1">
+                    <div class="col-6">
                         <div class="form-check offset-2">
-                            <input id="control-option3" class="form-check-input" type="checkbox" value="display 單一tag類別變化" >
-                            <label class="form-check-label option-text" for="flexCheckChecked">display 單一tag類別變化</label>
+                            <input id="control-option3" class="form-check-input" type="checkbox" value="Display one tag's change" >
+                            <label class="form-check-label option-text" for="control-option3">Display one tag's change</label>
                         </div>
                     </div>
                     <div class="col-5">
-                        <input id="control-option3-input" class="form-control form-control-sm" type="text" placeholder="輸入需要展示Tag類別" aria-label="Disabled input example" disabled>
+                        <input id="control-option3-input" class="form-control form-control-sm" type="text" placeholder="input display tag" aria-label="Disabled input example" disabled>
                     </div>
                 </div>
-
             </div>
 
-            <div class="col-12 col-lg-5">
-                <div class="title d-flex justify-content-center mb-3">Timer</div>
-                <div class="container-fluid">
-                    <div class="row justify-content-center">
-                        <div class="col-5">
-                            <input class="form-control w-100" id="timer-input" type="text" placeholder="輸入timer秒數">
-                        </div>
-                        <div class="col-5">
-                            <button class="ensure-timer-btn w-100 btn btn-secondary" id="timer-setting-btn">更換timer秒數</button>
-                        </div>
-                        <div class="col-12">
-                            <div class="result d-flex justify-content-center text-nowrap mt-3" id="timerStatusBox">Timer Setting is 3sec</div>
-                        </div>
-                        
-                    </div>
-                </div>
-            </div> 
         </div>
 
         <div class="row justify-content-center">
-            <div class="col-12 col-lg-10 mt-3">
+            <div class="col-12 col-lg-10 mt-1">
                 <div class="title d-flex justify-content-center mb-2">Compared Control</div>
 
                     <div class="row justify-content-center">
-                        <div class="col-4">
-                            <button class="w-100 btn btn-secondary" id="startCompare">Start Compare</button>
+                        <div class="col-8">
+                            <div class="card">
+                                <div class="card-header text-center fw-bolder">Compare Result INFO</div>
+                                <div class="card-body overflow-auto">
+                                    <div class="result text-nowrap my-1" id="timerSetting_Info">Timer Setting: 3sec</div>
+                                    <div class="result text-nowrap my-1" id="cssDisplay_Info">Ignore style attribute's change: "unchecked"</div>
+                                    <div class="result text-nowrap mb-1" id="displayCurrent_Info">Only display change of current selecting elemnt: "unchecked"</div>
+                                    <div class="subresult small text-nowrap mx-4 my-1" id="selectingMSG_value">Current is selecting:</div>
+                                    <div class="result  text-nowrap my-1" id="tagDisplay_Info">Display one tag's change: "unchecked"</div>
+                                    <div class="subresult small text-nowrap mx-4 my-1" id="tagDisplay_value">Current limit tag value: </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-4">
-                            <button class="w-100 btn btn-secondary" id="stopCompare">Stop Compare</button>
-                        </div>
-                        <div class="col-12">
-                            <div class="result small d-flex justify-content-center text-nowrap mt-3" id="selectingMSG">Is selecting: [NULL]</div>
-                        </div>
-                        <div class="col-12">
-                            <div class="result d-flex justify-content-center text-nowrap mt-3" id="compareControlBox">Compare Status</div>
+                        
+                        <div class="col-8">
+                            <div class="text-center fw-bolder compare-info" id="compare-status-info">Compare Status</div>
                         </div>
                     </div>
 
-                </div>
+                    <div class="row justify-content-center">
+                        <div class="col-3 mt-2">
+                            <button class="w-100 btn btn-secondary" id="startCompare">Start Compare</button>
+                        </div>
+                        <div class="col-3 mt-2">
+                            <button class="w-100 btn btn-secondary" id="stopCompare">Stop Compare</button>
+                        </div>
+                    </div>
             </div>
         </div>
 
         <div class="row justify-content-center">
-            <div class="col-12 col-lg-10 mt-3">
+            <div class="col-12 col-lg-10 mt-1">
                 <div class="title d-flex justify-content-center mb-2">Compare Result</div>
                 
                 <select class="form-select mb-2" name="compared-result" id="diffSelectDropdown">
-                    <option value="">請選擇查看的元件變化</option>
+                    <option value="">Please Choosee Element That Want To Know</option>
                     <optgroup id="dropdown-changed-area" label="changed-area">
-                        <option disabled>未結果</option>
+                        <option disabled>No result</option>
                     </optgroup>
                     <optgroup id="dropdown-added-area" label="added-area">
-                        <option disabled>未結果</option>
+                        <option disabled>No result</option>
                     </optgroup>
                     <optgroup id="dropdown-removed-area" label="removed-area">
-                        <option disabled>未結果</option>
+                        <option disabled>No result</option>
                     </optgroup>
                 </select>
             </div>
         </div>
-        
+
         <div class="row justify-content-center">
             <div class="col-12 col-lg-10 mt-2">
-                
                 <!-- Test -->
                 <div class="col-12">
                     <button class="w-100 btn btn-secondary" id="testButton">Test Compare Result</button>
                 </div>
-
-                <div id="select-result" class="result d-flex justify-content-center text-nowrap mb-3">select result: -> </div>
-
+            </div>
+        </div>        
+        
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-10 mt-2">
                 <table class="table table-bordered table-responsive">
-
                     <thead id="diff_content_title">
-                        <tr>
-                        <th scope="col" class="first-table bg-dark text-white" >Attribute</th>
-                        <th scope="col" class="second-table bg-dark text-white">Value</th>
-                        </tr>
+                        <!-- <tr>
+                            <th scope="col" class="first-table bg-dark text-white" >Attribute</th>
+                            <th scope="col" class="second-table bg-dark text-white">Value</th>
+                        </tr> -->
                     </thead>
-
                     <tbody id="diff_content_table">
-
+                        <!-- <tr>
+                            <th rowspan='3' scope='row' class='text-center text-nowrap bg-dark bg-opacity-50'>"
+                                Title1
+                            </th>
+                            <td>
+                                Title2
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class='table-secondary'>
+                                HTML
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class='table-danger'>
+                                HTML
+                            </td>
+                        </tr> -->
                     </tbody>
-
                 </table>
-
             </div>
         </div>
 

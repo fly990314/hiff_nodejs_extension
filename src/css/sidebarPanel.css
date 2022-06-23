@@ -89,6 +89,11 @@ header .intro-overview .stepContent{
   font-family: "Comic Sans MS", "Comic Sans", cursive;
 }
 
+.subresult {
+  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  text-decoration: underline;
+}
+
 .first-table{
 width: 20%;
 text-align: center;
@@ -97,4 +102,26 @@ text-align: center;
 .second-table{
 width: 80%;
 text-align: center;
+}
+
+.compare-info {
+  border-radius: 5px;
+  border-width: 3px ; 
+  background-color: rgb(190, 190, 190);
+  font-size: 16px;
+  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  color: rgb(65, 64, 64);
+  height: 40px;
+  line-height: 20px;
+  padding: 10px 0px 10px 0px;
+}
+
+td font.before {
+  background-color: rgb(201, 255, 169);
+  color: black;
+}
+
+td font.after {
+  background-color: rgb(252, 168, 135);
+  color: black;
 }
