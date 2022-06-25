@@ -90,14 +90,14 @@ tool_illustrate_hide_display_button.addEventListener('click',
 setting_timer_btn.addEventListener('click', 
     () => 
     {
-        clearInterval(countInterval);
+        // clearInterval(countInterval);
         if( Number(timer_input_field.value) != NaN && timer_input_field.value > 0) {
             timer_time = timer_input_field.value;
-            timerSetting_info.textContent = `Timer Setting: ${timer_time}sec`;
+            timerSetting_info.innerHTML = `Timer Setting: ${timer_time}sec`;
         }
 
         else {
-            timerSetting_info.textContent = `Timer Setting: Should be input valid value`;
+            timerSetting_info.innerHTML = `Timer Setting: Should be input valid value`;
         }
 
         timer_input_field.value = "";
@@ -205,6 +205,7 @@ chrome.runtime.onMessage.addListener(
         if (sender_package.type === 'return_compare_result_to_mainPanel') {
             //Set Local Storage
             chrome.storage.local.set({'diff': sender_package.compareResult }, function() { });
+            startCompare_btn.disabled = false;
 
             return_sender_response( { } );
             }
@@ -215,10 +216,11 @@ chrome.runtime.onMessage.addListener(
 startCompare_btn.addEventListener('click', 
     ()=>
     {
+        startCompare_btn.disabled = true;
         chrome.storage.local.set({'diff': "empty"}, function() { console.log('Value is reset to empty.'); });
         compare_result_display_title.innerHTML = "";
         compare_result_display_table.innerHTML = "";
-        compare_all_info = {'css_display': filter_checkbox_1_result, ' display_current_element': filter_checkbox_2_result, 'tag_display': filter_checkbox_3_result, 'tag_value': filter_tag_input.value, 'time': timer_time};
+        compare_all_info = {'css_display': filter_checkbox_1_result, 'display_current_element': filter_checkbox_2_result, 'tag_display': filter_checkbox_3_result, 'tag_value': filter_tag_input.value, 'time': timer_time};
         compare_process( compare_all_info.time, compare_all_info.tag_value );
     }
 );
@@ -227,7 +229,8 @@ stopCompare_btn.addEventListener('click',
     () => 
     {
         clearInterval(countInterval);
-        compare_status_info.textContent = `強制End timer and compare`;
+        startCompare_btn.disabled = false;
+        compare_status_info.innerHTML = `Ready To Compare`;
     }
 );
 
@@ -269,7 +272,7 @@ var time_showing_function = function(actualTime) {
                 if (secondsRemaining < 0) 
                 { 
                     clearInterval(countInterval);
-                    compare_status_info.textContent = "Compare End";
+                    compare_status_info.textContent = "Ready To Compare";
                     resolve();
                 };
             }, 
@@ -470,9 +473,8 @@ chrome.storage.onChanged.addListener(
                 let changedNewValue = changes['diff']['newValue'];
                 let parse_result = parse(changedNewValue);
                 console.log("update diff dropdown!!");
-                console.log(parse_result);
-                diffDrpodownUpdate(parse_result);
-
+                console.log(parse_result)
+                diffDrpodownUpdate(parse_result); 
             }
         }
     }
@@ -570,7 +572,7 @@ test_button.addEventListener('click',
 () => 
 {
     console.log("click test button");
-    const hiff = require('../lib/index.js');
+    const hiff = require('../hiff/lib/index.js');
         
     compare_all_info = {'css_display': filter_checkbox_1_result, ' display_current_element': filter_checkbox_2_result, 'tag_display': filter_checkbox_3_result, 'tag_value': filter_tag_input.value, 'time': timer_time};
     // let html1 = '<button id="btn-start" class="testClass">Start Compare And Wait 3s</button>';

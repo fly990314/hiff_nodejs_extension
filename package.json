@@ -9,11 +9,14 @@
     "build": "webpack --mode=production --config config/webpack.config.js"
   },
   "devDependencies": {
+    "chai": "^4.3.6",
     "copy-webpack-plugin": "^6.4.1",
     "css-loader": "^4.3.0",
     "file-loader": "^6.2.0",
     "jshint": "2.10",
     "mini-css-extract-plugin": "^0.10.1",
+    "mocha": "^10.0.0",
+    "q-io": "^1.13.6",
     "size-plugin": "^2.0.2",
     "webpack": "^4.46.0",
     "webpack-cli": "^3.3.12",

@@ -2,7 +2,7 @@
 "use strict";
 
 var util = require('util');
-var nodeType = require('../util/cheerio-utils').nodeType;
+var nodeType = require('./cheerio-utils').nodeType;
 
 module.exports = cssPath;
 

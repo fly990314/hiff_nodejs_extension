@@ -1,6 +1,6 @@
 'use strict';
 
-const hiff = require('../lib/index.js');
+const hiff = require('../hiff/lib/index.js');
 const {parse, stringify} = require('flatted/cjs');
 var content_start_in_background = "";
 var content_end_in_background = "";
