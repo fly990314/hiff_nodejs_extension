@@ -9,6 +9,16 @@ describe("Change objects", function() {
     var html2 = "<div class='test'><a>A</a><i>I</i><b>B</b></div>";
     var d = hiff.compare(html1, html2);
 
+    // assert added setting
+    assert.typeOf(d.added_type, 'array');
+    assert.equal(d.added_type.length, 1);
+    assert.equal(d.added_type[0].type, "added");
+    assert.equal(d.added_type[0].contentHTML, "<i>I</i>");
+    assert.typeOf(d.changed_type, 'array');
+    assert.equal(d.changed_type.length, 0);
+    assert.typeOf(d.removed_type, 'array');
+    assert.equal(d.removed_type.length, 0);
+
     var change = d.changes[0];
     assert.equal(change.type, 'added');
     assert.ok(change.before);
@@ -40,6 +50,16 @@ describe("Change objects", function() {
     var html1 = "<div class='test'><a>A</a><i>I</i><b>B</b></div>";
     var html2 = "<div class='test'><a>A</a><b>B</b></div>";
     var d = hiff.compare(html1, html2);
+
+    // assert removed setting
+    assert.typeOf(d.added_type, 'array');
+    assert.equal(d.added_type.length, 0);
+    assert.typeOf(d.changed_type, 'array');
+    assert.equal(d.changed_type.length, 0);
+    assert.typeOf(d.removed_type, 'array');
+    assert.equal(d.removed_type.length, 1);
+    assert.equal(d.removed_type[0].type, "removed");
+    assert.equal(d.removed_type[0].contentHTML, "<i>I</i>");
 
     var change = d.changes[0];
     assert.equal(change.type, 'removed');

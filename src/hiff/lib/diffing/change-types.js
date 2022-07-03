@@ -29,6 +29,8 @@ function added($addedNode, $parentBefore, indexBefore, $parentAfter, indexAfter)
     type: "added",
     before: locationInfo($parentBefore, undefined, indexBefore),
     after:  locationInfo($parentAfter, $addedNode, indexAfter),
+    selectingNode: $parentAfter,
+    //變更html後才會判斷select條件，所以要選$parentAfter
     nodeINFO: $addedNode,
     contentHTML: stringify($addedNode, false),
     // message: "Added:    " + colors.green(stringify($addedNode, true)),
@@ -40,6 +42,7 @@ function removed($removedNode, $parentBefore, indexBefore, $parentAfter, indexAf
     type: "removed",
     before: locationInfo($parentBefore, $removedNode, indexBefore),
     after:  locationInfo($parentAfter, undefined, indexAfter),
+    selectingNode: $parentAfter,
     nodeINFO: $removedNode,
     contentHTML: stringify($removedNode, false),
     // message: "Removed:  " + colors.red(stringify($removedNode, true))
@@ -57,10 +60,12 @@ function changed($nodeBefore, $nodeAfter) {
     type: "changed",
     before: locationInfo(before.$parent, $nodeBefore, before.index),
     after: locationInfo(after.$parent, $nodeAfter, after.index),
+    selectingNode: $nodeAfter,
     nodeINFO: $nodeBefore,
-    attributeAfter: merge_element_attribute_to_object($nodeAfter),
-    attributeBefore: merge_element_attribute_to_object($nodeBefore),
-    diff_attr_result: diff_attribute_object ($nodeBefore, $nodeAfter),
+    // attributeAfter: merge_element_attribute_to_object($nodeAfter),
+    // attributeBefore: merge_element_attribute_to_object($nodeBefore),
+    info_compare: info_compare ($nodeBefore, $nodeAfter)
+
     // message: "Modified: " + coloredChanges(stringify($nodeBefore, true), stringify($nodeAfter, true)),
   };
 }
@@ -107,37 +112,45 @@ function grabParentAndIndex($node) {
   return {$parent: $parent, index: index};
 }
 
-function merge_element_attribute_to_object($node) {
-  // input: element
-  var return_object = {};
-  if($node[0]['attribs'] && $node[0]['type'] !== "text") {``
-    return_object = $node[0]['attribs'];
-    return_object['label'] = $node[0]['name'];
+function return_element_all_info($node) {
+  let node_element = Object.assign({}, $node);
+  let return_object= {};
+  if (node_element[0]['type'] === "tag") {
+    return_object =  Object.assign({}, node_element[0]['attribs']);
+    return_object['label'] = node_element[0]['name'] ;
   }
-  else if ($node[0]['type'] === "text") {
-    return_object['data'] = $node[0]['data'];
+  else if(node_element[0]['type'] === "text") {
+    return_object['data'] = node_element[0]['data'];
   }
   return return_object;
 }
 
-function diff_attribute_object ($node_before, $node_after) {
+function info_compare ($node_before, $node_after) {
   // if($node_before[0]['type'] === "text" || $node_after[0]['type'] === "text") { return {}; }
-  let before_attrribute = merge_element_attribute_to_object($node_before);
-  let after_attrribute = merge_element_attribute_to_object($node_after);
+  let diff_attribute_result = {};
+  let info_with_before = return_element_all_info($node_before);
+  let info_with_after  = return_element_all_info($node_after);
 
-  let before_keys = Object.keys(before_attrribute);
-  let after_keys = Object.keys(after_attrribute);
-  let keys = _.uniq(before_keys.concat(after_keys));
-  var diff_attribute_result = {};
-  for (var i in keys) 
-  {
-    if (before_attrribute.hasOwnProperty(keys[i]) === true && after_attrribute.hasOwnProperty(keys[i]) === true) {
-      let beforeAttr = before_attrribute[keys[i]];
-      let afterAttr = after_attrribute[keys[i]];
-      let parts = diff.diffChars(beforeAttr, afterAttr);
+  let before_info_keys = Object.keys(info_with_before);
+  let after_info_keys = Object.keys(info_with_after);
+  let keys = _.uniq(before_info_keys.concat(after_info_keys));
+  for (var i in keys) {
+    if (info_with_before.hasOwnProperty(keys[i]) === true && info_with_after.hasOwnProperty(keys[i]) === true) {
+      let beforeInfo = info_with_before[keys[i]];
+      let afterInfo = info_with_after[keys[i]];
+      if(keys[i] === "label") {
+        if(beforeInfo === afterInfo) {
+          diff_attribute_result[keys[i]] = {'before': beforeInfo, 'after': afterInfo, 'diff_msg': "[Same]"};
+        }
+        else {
+          diff_attribute_result[keys[i]] = {'before': beforeInfo, 'after': afterInfo, 'diff_msg': "[Diff]"};
+        }
+        continue;
+      }
+      let parts = diff.diffChars(beforeInfo, afterInfo);
       let diff_msg = "";
       // 如果attribute value不同，才需要比對，不然diff_msg會為空值
-      if (beforeAttr !==afterAttr) {
+      if (beforeInfo !==afterInfo) {
         diff_msg = _.map(parts, function(part) 
                       {
                         // before and after -> add是before到after有增加東西，增加的東西是after的
@@ -150,20 +163,20 @@ function diff_attribute_object ($node_before, $node_after) {
       else {
         diff_msg = "[Same]";
       }
-      diff_attribute_result[keys[i]] = {'before': beforeAttr, 'after': afterAttr, 'diff_msg':diff_msg};
+      diff_attribute_result[keys[i]] = {'before': beforeInfo, 'after': afterInfo, 'diff_msg':diff_msg};
     }
     
-    else if (before_attrribute.hasOwnProperty(keys[i]) === false && after_attrribute.hasOwnProperty(keys[i]) === true) {
-      let diff_msg = "[Add] " + '<font class="before">'+after_attrribute[keys[i]]+ '</font>';
-      diff_attribute_result[keys[i]] = {'before': "", 'after': after_attrribute[keys[i]], 'diff_msg': diff_msg};
+    else if (info_with_before.hasOwnProperty(keys[i]) === false && info_with_after.hasOwnProperty(keys[i]) === true) {
+      let diff_msg = "[Add] " + '<font class="before">'+info_with_after[keys[i]]+ '</font>';
+      diff_attribute_result[keys[i]] = {'before': "", 'after': info_with_after[keys[i]], 'diff_msg': diff_msg};
     }
     
-    else if (before_attrribute.hasOwnProperty(keys[i]) === true && after_attrribute.hasOwnProperty(keys[i]) === false) {
-      let diff_msg = "[Remove] " + '<font class="after">'+before_attrribute[keys[i]]+ '</font>';
-      diff_attribute_result[keys[i]] = {'before': before_attrribute[keys[i]], 'after': "", 'diff_msg': diff_msg};
+    else if (info_with_before.hasOwnProperty(keys[i]) === true && info_with_after.hasOwnProperty(keys[i]) === false) {
+      let diff_msg = "[Remove] " + '<font class="after">'+info_with_before[keys[i]]+ '</font>';
+      diff_attribute_result[keys[i]] = {'before': info_with_before[keys[i]], 'after': "", 'diff_msg': diff_msg};
     }
     
-    else if(before_attrribute.hasOwnProperty(keys[i]) === false && after_attrribute.hasOwnProperty(keys[i]) === false) {
+    else if(info_with_before.hasOwnProperty(keys[i]) === false && info_with_after.hasOwnProperty(keys[i]) === false) {
       continue;
     }
   }

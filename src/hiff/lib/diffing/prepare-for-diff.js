@@ -72,9 +72,7 @@ function removeEmptyTextNodes($node) {
 }
 
 function removeScriptElement($node) {
-  // is this a text node?
-  // console.log($node)
-  // console.log($node.type)
+  // is this a Script node?
   if ($node[0].type === 'script' && $node[0].name === 'script') {
     $node.remove();
   }

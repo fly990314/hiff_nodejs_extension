@@ -25,10 +25,10 @@ describe("Ignoring text", function() {
     });
     // we expect two changes, the removal of old <b> and addition of a new one
     assert.ok(d.different);
-    // assert.lengthOf(d.changes, 2);
-    // assert.ok(_.every(d.changes, function(c) {
-    //   return c.before.path == 'b' || c.after.path == 'b';
-    // }));
+    assert.lengthOf(d.changes, 2);
+    assert.ok(_.every(d.changes, function(c) {
+      return c.before.path == 'b' || c.after.path == 'b';
+    }));
   });
 
   it("should interpret 'true' to mean 'ignore content of all text nodes'", function() {

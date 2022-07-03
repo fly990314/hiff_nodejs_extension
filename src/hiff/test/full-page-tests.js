@@ -43,9 +43,9 @@ describe("Hiff", function () {
   it("paragraph soups with no classes or IDs", function() {
     var d = compareFixtures("paragraph-soup-before.html", "paragraph-soup-after.html");
     assert.ok(d.different);
-    // assert(_.every(d.changes, {type: 'added'}), "There were non-addition changes.");
-    // assert(_.every(d.changes, function(c) {
-    //   return c.after.$node.is('p');
-    // }), "Some changes were concerning non-<p> nodes.");
+    assert(_.every(d.changes, {type: 'added'}), "There were non-addition changes.");
+    assert(_.every(d.changes, function(c) {
+      return c.after.$node.is('p');
+    }), "Some changes were concerning non-<p> nodes.");
   });
 });

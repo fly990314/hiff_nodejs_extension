@@ -4,12 +4,12 @@ var hiff = require('../lib');
 
 describe("Tag comparison configuration", function() {
   describe("should let you ignore", function() {
-    // it("tag names", function() {
-    //   var html1 = "<div>1</div>";
-    //   var html2 = "<span>1</span>";
-    //   var d = hiff.compare(html1, html2, {tagComparison: {name: false}});
-    //   assert.ok(!d.different);
-    // });
+    it("tag names", function() {
+      var html1 = "<div>1</div>";
+      var html2 = "<span>1</span>";
+      var d = hiff.compare(html1, html2, {tagComparison: {name: false}});
+      assert.ok(!d.different);
+    });
     it("ids", function() {
       var html1 = "<div id='a'>1</div>";
       var html2 = "<div id='b'>1</div>";

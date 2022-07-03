@@ -97,6 +97,7 @@ setting_timer_btn.addEventListener('click',
         }
 
         else {
+            timer_time = -1;
             timerSetting_info.innerHTML = `Timer Setting: Should be input valid value`;
         }
 
@@ -216,12 +217,17 @@ chrome.runtime.onMessage.addListener(
 startCompare_btn.addEventListener('click', 
     ()=>
     {
-        startCompare_btn.disabled = true;
-        chrome.storage.local.set({'diff': "empty"}, function() { console.log('Value is reset to empty.'); });
-        compare_result_display_title.innerHTML = "";
-        compare_result_display_table.innerHTML = "";
-        compare_all_info = {'css_display': filter_checkbox_1_result, 'display_current_element': filter_checkbox_2_result, 'tag_display': filter_checkbox_3_result, 'tag_value': filter_tag_input.value, 'time': timer_time};
-        compare_process( compare_all_info.time, compare_all_info.tag_value );
+        if(timer_time <=0 || ( filter_checkbox_3_result === true && filter_tag_input.value === "")) {
+            compare_status_info.innerHTML = `Should ensure info corrent!`;
+        }
+        else{
+            startCompare_btn.disabled = true;
+            chrome.storage.local.set({'diff': "empty"}, function() { console.log('Value is reset to empty.'); });
+            compare_result_display_title.innerHTML = "";
+            compare_result_display_table.innerHTML = "";
+            compare_all_info = {'css_display': filter_checkbox_1_result, 'display_current_element': filter_checkbox_2_result, 'tag_display': filter_checkbox_3_result, 'tag_value': filter_tag_input.value, 'time': timer_time};
+            compare_process( compare_all_info );
+        }
     }
 );
 
@@ -235,12 +241,12 @@ stopCompare_btn.addEventListener('click',
 );
 
     // -> tool function
-const communicate_with_start_compare = function(isOption) {
+const communicate_with_start_compare = function(compare_info) {
     chrome.runtime.sendMessage
     (
         {
             type: 'need_to_save_current_html in background',
-            payload:{ senderLocation: 'mainPanel', message: 'we need to save current html and wait end of compare.', hiffOption: isOption}
+            payload:{ senderLocation: 'sidebarPanel', message: 'we need to save current html and wait end of compare.', hiffOption: compare_info}
         },
         response => { }
     );
@@ -251,7 +257,7 @@ const communicate_with_end_compare = function() {
     (
         {
             type: 'need_to_save_current_html in background and start to compare',
-            payload:{ senderLocation: 'mainPanel', message: 'need to save current html and start to compare HTML of before and after.' }
+            payload:{ senderLocation: 'sidebarPanel', message: 'need to save current html and start to compare HTML of before and after.' }
         },
         response => { }
     );
@@ -281,10 +287,10 @@ var time_showing_function = function(actualTime) {
     });
 }
     //async function
-async function compare_process(timer_wait_time, isOption) {
+async function compare_process(compare_info) {
 
-    communicate_with_start_compare(isOption);
-    await time_showing_function(timer_wait_time);
+    communicate_with_start_compare(compare_info);
+    await time_showing_function(compare_info.time);
     communicate_with_end_compare();
 }
 
@@ -293,20 +299,23 @@ async function compare_process(timer_wait_time, isOption) {
 // option: [Display one tag's change] function 
 function to_filter_same_tag() {
     for(var i = 0; i < changed_set.length ; i++) {
-        if( changed_set[i].nodeINFO[0]['name'] == filter_checkbox_3_input_result) {
+        if(( changed_set[i].nodeINFO[0].name === filter_checkbox_3_input_result && changed_set[i].nodeINFO[0].type === "tag") || (changed_set[i].nodeINFO[0].parent.name === filter_checkbox_3_input_result && changed_set[i].nodeINFO[0].type === "text")){
             changed_set.splice(i, 1);
+            i-=1;
         }
     }
 
     for(var i = 0; i < added_set.length ; i++) {
-        if( added_set[i].nodeINFO[0]['name'] == filter_checkbox_3_input_result) {
+        if(( added_set[i].nodeINFO[0].name === filter_checkbox_3_input_result && added_set[i].nodeINFO[0].type === "tag") || (added_set[i].nodeINFO[0].parent.name === filter_checkbox_3_input_result && added_set[i].nodeINFO[0].type === "text")){
             added_set.splice(i, 1);
+            i-=1;
         }
     }
 
     for(var i = 0; i < removed_set.length ; i++) {
-        if( removed_set[i].nodeINFO[0]['name'] == filter_checkbox_3_input_result) {
+        if(( removed_set[i].nodeINFO[0].name === filter_checkbox_3_input_result && removed_set[i].nodeINFO[0].type === "tag") || (removed_set[i].nodeINFO[0].parent.name === filter_checkbox_3_input_result && removed_set[i].nodeINFO[0].type === "text")){
             removed_set.splice(i, 1);
+            i-=1;
         }
     }
 }
@@ -342,49 +351,64 @@ function isElementSame(a, b) {
 
 function return_element_outerHTML(node) {
     return node.outerHTML;
- }
+}
 
 function load_selecting_element_and_filter_sets(diffObject) {
     return new Promise((resolve, reject) =>{
         chrome.devtools.inspectedWindow.eval("(" + return_element_outerHTML.toString() + ")($0)", function (result, isException) {
             if (!isException && result !== null) {
                 let inited_result = result.replace(/\n/g, "").replace(/    /g, "");
-                let regenerate_node = function merge_element_attribute_to_object($node) {
-                    // input: element
-                    var return_object = {};
-                    if($node['attribs'] && $node['type'] !== "text") {``
-                      return_object = $node['attribs'];
-                      return_object['label'] = $node['name'];
-                    }
-                    else if ($node['type'] === "text") {
-                      return_object['data'] = $node['data'];
-                    }
-                    $node['attribs'] = return_object
-                    return $node;
-                  }
                 let $result = cheerio.load(inited_result);
                 let $element_info =  $result($result.root()).children()['0'];
-
-                $result = cheerio.load(inited_result);
-                $element_info =  regenerate_node( $result($result.root()).children()['0'] );
-
                 //比較...
-                // tag, name, attribs是不是都相同 $element_info
-                for(var i = 0; i < changed_set.length ; i++) {
-                    if(!isElementSame( $element_info, changed_set[i].nodeINFO[0] )) {
-                        changed_set.splice(i, 1);
+                for(var i = 0; i < changed_set.length; i++) {
+                    if(changed_set[i].nodeINFO[0].type === "tag") {
+                        //屬性為tag，用當前的selectingNode屬性比對
+                        if(!isElementSame( $element_info, changed_set[i].selectingNode[0] )) {
+                            changed_set.splice(i, 1);
+                            i-=1;
+                        }
+                    }
+                    else if (changed_set[i].nodeINFO[0].type === "text"){
+                        //屬性為data，用當前的selectingNode的父節點屬性比對
+                        if(!isElementSame( $element_info, changed_set[i].selectingNode[0].parent)){
+                            changed_set.splice(i, 1);
+                            i-=1;
+                        }
                     }
                 }
-    
+                
                 for(var i = 0; i < added_set.length ; i++) {
-                    if(!isElementSame( $element_info, added_set[i].nodeINFO[0] )) {
-                        changed_set.splice(i, 1);
+                    if(added_set[i].nodeINFO[0].type === "tag") {
+                        //屬性為tag，用當前的selectingNode屬性比對
+                        if(!isElementSame( $element_info, added_set[i].selectingNode[0] )) {
+                            added_set.splice(i, 1);
+                            i-=1;
+                        }
+                    }
+                    else if (added_set[i].nodeINFO[0].type === "text"){
+                        //屬性為data，用當前的selectingNode的父節點屬性比對
+                        if(!isElementSame( $element_info, added_set[i].selectingNode[0].parent)){
+                            added_set.splice(i, 1);
+                            i-=1;
+                        }
                     }
                 }
-    
+                
                 for(var i = 0; i < removed_set.length ; i++) {
-                    if(!isElementSame( $element_info, removed_set[i].nodeINFO[0] )) {
-                        changed_set.splice(i, 1);
+                    if(removed_set[i].nodeINFO[0].type === "tag") {
+                        //屬性為tag，用當前的selectingNode屬性比對
+                        if(!isElementSame( $element_info, removed_set[i].selectingNode[0] )) {
+                            added_set.splice(i, 1);
+                            i-=1;
+                        }
+                    }
+                    else if (removed_set[i].nodeINFO[0].type === "text"){
+                        //屬性為data，用當前的selectingNode的父節點屬性比對
+                        if(!isElementSame( $element_info, removed_set[i].selectingNode[0].parent)){
+                            added_set.splice(i, 1);
+                            i-=1;
+                        }
                     }
                 }
                 resolve();
@@ -496,7 +520,7 @@ compare_result_select_dropdown.addEventListener("change", function(changeResult)
     // changed set
     if ( changed_set_length != 0 && selectedOptionIndex <= (buffer + changed_set_length) ) {
         let index = selectedOptionIndex-1;
-        let changed_diff_list = changed_set[index].diff_attr_result;
+        let changed_diff_list = changed_set[index].info_compare;
         let changed_diff_keys = Object.keys(changed_diff_list);
         let total_innerHTML = "";
         compare_result_display_table.innerHTML = compare_result_title_for_changed;

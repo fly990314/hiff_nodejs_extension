@@ -39,9 +39,10 @@ var wait_after_compare_data_and_finish_compare_and_return = function () {
   else
   {
     // hiff比較時，會把script類型刪除, 並看使用者需不需要用到style屬性
-    let start_string =  content_start_in_background.replace(/\n/g, "").replace(/    /g, "");
-    let end_string =  content_end_in_background.replace(/\n/g, "").replace(/    /g, "");
-    let result = hiff.compare(start_string, end_string, {ignoreStyleAttribute: is_display_option_buffer});
+    // let start_string =  content_start_in_background.replace(/\n/g, "").replace(/    /g, "");
+    // let end_string =  content_end_in_background.replace(/\n/g, "").replace(/    /g, "");
+    // let result = hiff.compare(start_string, end_string, {ignoreStyleAttribute: is_display_option_buffer});
+    let result = hiff.compare(content_start_in_background, content_end_in_background, {ignoreStyleAttribute: is_display_option_buffer});
 
     chrome.runtime.sendMessage
     (
@@ -70,7 +71,8 @@ chrome.runtime.onMessage.addListener(
     let return_sender_startCompare_msg = 'Hi, in background, we finished compared html with start.';
     content_start_in_background = "";
     content_end_in_background = "";
-    is_display_option_buffer = sender_package.payload.hiffOption
+    // compare_all_info = {'css_display': filter_checkbox_1_result, 'display_current_element': filter_checkbox_2_result, 'tag_display': filter_checkbox_3_result, 'tag_value': filter_tag_input.value, 'time': timer_time};
+    is_display_option_buffer = sender_package.payload.hiffOption.css_display;
 
     console.log( sender_package.payload.message );
     

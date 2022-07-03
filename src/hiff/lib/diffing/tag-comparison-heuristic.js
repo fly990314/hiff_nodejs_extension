@@ -71,7 +71,6 @@ function createHeuristic(weights) {
       different = different || ((differentAttribs.length > 0) && (weights.attributes > 0));
       similarity += componentResult('attributes', attributesDifferSignificantly);
     }
-
     // finally, if the contents are at least 50% different
     // we treat this as a significant difference
     var possibleChildChanges = _.max([$n1.contents().length, $n2.contents().length]);  // get max change num.
@@ -86,7 +85,6 @@ function createHeuristic(weights) {
 
       // adds/removals 'cancel' each other to handle single changes generating an add/remove
       totalChildChanges = _.max([found.added, found.removed]) + found.changed;
-
       var contentsDifferSignificantly = (totalChildChanges / possibleChildChanges) > 0.99;
       different = different || (childChanges.length > 0);
       similarity += componentResult('contents', contentsDifferSignificantly);
@@ -97,11 +95,13 @@ function createHeuristic(weights) {
       return DiffLevel.IDENTICAL;
     } else {
       // some changes, the accumulated 'result' decides whether it's still the same node
-        if(similarity >= 0 || attributes.length == 0) {
-          return DiffLevel.SAME_BUT_DIFFERENT;
-        }
-        else
-          return DiffLevel.NOT_THE_SAME_NODE;
+        return (similarity >= 0) ? DiffLevel.SAME_BUT_DIFFERENT : DiffLevel.NOT_THE_SAME_NODE;
+        // if(similarity >= 0 || attributes.length == 0) {
+        //   return DiffLevel.SAME_BUT_DIFFERENT;
+        // }
+        // else {
+        //   return DiffLevel.NOT_THE_SAME_NODE;
+        // }
     }
   }
 

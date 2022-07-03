@@ -21,6 +21,12 @@ describe("Semantic comparison", function () {
 
   it("should understand newlines in attributes", noChange(
     "<meta content='This is some content.'>",
-    "<meta content='This\n is some\n      content.'>"
+    "<meta content='This\n is some\n   content.'>"
   ));
+
+  it("should compare  HTML that get ot cmd 'document.body.innerHTML'", noChange(
+    '\n   <section class="blog-articles">\n  <article id="one"></article>\n  <article id="two"></article>\n  <article id="three"></article><article id="four"></article>\n</section>',
+    '<section class="blog-articles"><article id="one"></article><article id="two"></article><article id="three"></article><article id="four"></article></section>'
+  ));
+
 });
